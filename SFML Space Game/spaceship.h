@@ -14,7 +14,9 @@ public:
 	sf::Vector2f velocity;
 	float rotation; //in degrees
 
-	Spaceship();
+	int shipNumber;
+
+	Spaceship(int ShipNumber);
 
 	void handleInputs();
 	void update();

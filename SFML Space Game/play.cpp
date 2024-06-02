@@ -1,9 +1,11 @@
+#include <iostream>
 #include "play.h"
 #include "spaceship.h"
 
 ScreenName playScreen(sf::RenderWindow& window)
 {
-	Spaceship ship1;
+	Spaceship ship0(0);
+	Spaceship ship1(1);
 
 	while (window.isOpen())
 	{
@@ -18,9 +20,13 @@ ScreenName playScreen(sf::RenderWindow& window)
 		}
 		window.clear();
 
+		ship0.handleInputs();
+		ship0.update();
+
 		ship1.handleInputs();
 		ship1.update();
 
+		ship0.draw(window);
 		ship1.draw(window);
 
 		window.display();
