@@ -1,11 +1,33 @@
 #include <SFML/Graphics.hpp>
+#include "CommonDef.h"
+#include "play.h"
+
+const int FRAMERATE = 60;
+const int WIN_X_LEN = 1280;
+const int WIN_Y_LEN = 720;
 
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(1280, 720), "Space Game");
-	sf::RectangleShape rectangle(sf::Vector2f(100, 100));
-	rectangle.setFillColor(sf::Color::White);
+	sf::RenderWindow window(sf::VideoMode(WIN_X_LEN, WIN_Y_LEN), "Space Game");
+	window.setFramerateLimit(FRAMERATE);
+	
+	ScreenName nextScreen = ScreenName::play;
 
+	while (nextScreen != ScreenName::none)
+	{
+		switch (nextScreen)
+		{
+		case ScreenName::home:
+			break;
+		case ScreenName::play:
+			nextScreen = playScreen(window);
+			break;
+		case ScreenName::none:
+			break;
+		}
+	}
+
+	/*
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -18,7 +40,8 @@ int main()
 		}
 
 		window.clear();
-		window.draw(rectangle);
+		
 		window.display();
 	}
+	*/
 }
