@@ -134,6 +134,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="Healthbar.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="play.cpp" />
     <ClCompile Include="spaceship.cpp" />
@@ -141,6 +142,7 @@
   <ItemGroup>
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="CommonDef.h" />
+    <ClInclude Include="Healthbar.h" />
     <ClInclude Include="play.h" />
     <ClInclude Include="spaceship.h" />
   </ItemGroup>

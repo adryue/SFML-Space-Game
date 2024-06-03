@@ -3,6 +3,7 @@
 #include "CommonDef.h"
 #include "play.h"
 #include "Bullet.h"
+#include "Healthbar.h"
 
 class Spaceship
 {
@@ -18,8 +19,12 @@ public:
 	float rotation; //in degrees
 
 	float heat;
+	Healthbar heatbar;
+
+	int firingCooldown;
 
 	int shipNumber;
+
 
 	Spaceship(int ShipNumber);
 

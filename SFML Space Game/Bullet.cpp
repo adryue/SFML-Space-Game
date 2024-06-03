@@ -2,7 +2,7 @@
 
 const float BULLET_RADIUS = 3.0;
 const float BULLET_SPEED = 10.0;
-const float BULLET_DAMAGE = 5.0;
+const float BULLET_DAMAGE = 2.0;
 
 Bullet::Bullet(sf::Vector2f pos, sf::Vector2f vel)
 {

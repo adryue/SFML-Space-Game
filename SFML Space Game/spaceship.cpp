@@ -9,6 +9,11 @@ const sf::Vector2f SHIP_SIZE = sf::Vector2f(10, 40);
 const float SHIP_ROTATION_SPEED = 3.5;
 const float SHIP_MOVEMENT_SPEED = 0.1;
 
+const float SHIP_MAX_HEAT = 300;
+const float SHIP_HEAT_DISSIPATION = 0.2;
+
+const int SHIP_FIRING_COOLDOWN = 5;
+
 const float JOYSTICK_THRESHOLD = 0.15; //the minimum value required to move (after the joystick is normalized)
 const float JOYSTICK_X_MAX_VALUE = 70; //the maximum value from joystick x input
 const float JOYSTICK_Z_MAX_VALUE = 60; //the maximum value from joystick Z input
@@ -16,7 +21,7 @@ const float JOYSTICK_R_MAX_VALUE = 60; //the maximum value from joystick R input
 const float JOYSTICK_U_MAX_VALUE = 75;
 
 
-Spaceship::Spaceship(int ShipNumber)
+Spaceship::Spaceship(int ShipNumber) : heatbar(SHIP_MAX_HEAT, ShipNumber)
 {
 	hitbox.setSize(SHIP_SIZE);
 	hitbox.setOrigin(SHIP_SIZE.x / 2, SHIP_SIZE.y / 2);
@@ -34,6 +39,8 @@ Spaceship::Spaceship(int ShipNumber)
 	rotation = 0;
 
 	heat = 0;
+
+	firingCooldown = 0;
 
 	shipNumber = ShipNumber;
 	switch (shipNumber)
@@ -77,6 +84,7 @@ void Spaceship::handleInputs()
 	}
 
 	//---firing a bullet---
+	//if (firingCooldown == 0)
 	if (sf::Joystick::isButtonPressed(shipNumber, 1))
 	{
 		Bullet b(position, velocity); //bullet has the same starting position and velocity as the ship
@@ -148,12 +156,19 @@ void Spaceship::update()
 	position += velocity;
 	hitbox.setPosition(position);
 	collisionBox.setPosition(position);
+
+	heat -= SHIP_HEAT_DISSIPATION;
+	heat = std::max(heat, 0.0f);
+	heatbar.setValue(heat);
 }
 
 void Spaceship::draw(sf::RenderWindow& window)
 {
 	//window.draw(collisionBox);
 	window.draw(hitbox);
+
+	//draw ui
+	heatbar.draw(window);
 }
 
 bool Spaceship::handleCollision(Bullet b)
@@ -172,7 +187,7 @@ bool Spaceship::handleCollision(Bullet b)
 void Spaceship::damage(float amount)
 {
 	heat += amount;
-	std::cout << "heat: " << heat << std::endl;
+	heatbar.setValue(heat);
 }
 
 
