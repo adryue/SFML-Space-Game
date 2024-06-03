@@ -1,6 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "CommonDef.h"
+#include "play.h"
+#include "Bullet.h"
 
 class Spaceship
 {

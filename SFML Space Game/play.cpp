@@ -1,6 +1,14 @@
 #include <iostream>
+#include <vector>
 #include "play.h"
-#include "spaceship.h"
+
+
+std::vector<Bullet> bullets;
+
+void addBullet(Bullet bullet) //used inside the spaceship class
+{
+	bullets.push_back(bullet);
+}
 
 ScreenName playScreen(sf::RenderWindow& window)
 {
@@ -20,15 +28,27 @@ ScreenName playScreen(sf::RenderWindow& window)
 		}
 		window.clear();
 
+		//ship inputs
 		ship0.handleInputs();
-		ship0.update();
-
 		ship1.handleInputs();
+
+		//update ship positions
+		ship0.update();
 		ship1.update();
 
+		//update bullets
+		for (Bullet& b : bullets)
+		{
+			b.update();
+		}
+
+		//draw everything
 		ship0.draw(window);
 		ship1.draw(window);
-
+		for (Bullet& b : bullets)
+		{
+			b.draw(window);
+		}
 		window.display();
 	}
 
