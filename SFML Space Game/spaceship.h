@@ -11,10 +11,13 @@ public:
 	sf::Texture texture;
 	sf::Sprite sprite;
 	sf::RectangleShape hitbox;
+	sf::CircleShape collisionBox;
 
 	sf::Vector2f position;
 	sf::Vector2f velocity;
 	float rotation; //in degrees
+
+	float heat;
 
 	int shipNumber;
 
@@ -23,4 +26,7 @@ public:
 	void handleInputs();
 	void update();
 	void draw(sf::RenderWindow& window);
+
+	bool handleCollision(Bullet b);
+	void damage(float amount);
 };

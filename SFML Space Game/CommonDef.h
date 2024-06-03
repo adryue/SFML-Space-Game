@@ -20,5 +20,5 @@ extern const float SHIP_MOVEMENT_SPEED;
 
 //defined in bullet.cpp
 extern const float BULLET_RADIUS;
-
 extern const float BULLET_SPEED;
+extern const float BULLET_DAMAGE;

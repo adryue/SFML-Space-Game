@@ -37,10 +37,17 @@ ScreenName playScreen(sf::RenderWindow& window)
 		ship1.update();
 
 		//update bullets
-		for (Bullet& b : bullets)
+		for (int i = 0; i < bullets.size(); i++)
 		{
-			b.update();
+			bullets[i].update();
+			if (ship0.handleCollision(bullets[i]) || ship1.handleCollision(bullets[i]))
+			{
+				bullets.erase(bullets.begin() + i);
+				i--;
+			}
 		}
+
+		//std::cout << sf::Joystick::getAxisPosition(1, sf::Joystick::U) << " " << sf::Joystick::getAxisPosition(1, sf::Joystick::V) << std::endl;
 
 		//draw everything
 		ship0.draw(window);
