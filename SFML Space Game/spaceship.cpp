@@ -4,18 +4,20 @@
 #include "spaceship.h"
 
 //const sf::Vector2f SHIP_SIZE = sf::Vector2f(5, 20);
-const sf::Vector2f SHIP_SIZE(10, 40);
-const sf::Vector2f SHIP_EXPANDED_SIZE(30, 120);
+const sf::Vector2f SHIP_SIZE(40, 40);
+const float SHIP_RADIUS = (SHIP_SIZE.x + SHIP_SIZE.y) / 4; //used for calculating collisions
+const sf::Vector2f SHIP_EXPANDED_SIZE(80, 80);
+const float SHIP_EXPANDED_RADIUS = (SHIP_EXPANDED_SIZE.x + SHIP_EXPANDED_SIZE.y) / 4;
 
 const float SHIP_ROTATION_SPEED = 3.5;
 const float SHIP_MOVEMENT_SPEED = 0.1;
 
 const float SHIP_MAX_HEAT = 300;
-const float SHIP_HEAT_DISSIPATION = 0.2;
+const float SHIP_HEAT_DISSIPATION = 0.3;
 const float SHIP_HEAT_EXPANDED_DISSIPATION = 1.0;
 
 const int SHIP_FIRING_COOLDOWN = 20;
-const float SHIP_FIRING_KNOCKBACK = 0.01;
+const float SHIP_FIRING_KNOCKBACK = 0.01; //multiplier value based on bullet's speed
 
 const float JOYSTICK_THRESHOLD = 0.15; //the minimum value required to move (after the joystick is normalized)
 const float JOYSTICK_X_MAX_VALUE = 70; //the maximum value from joystick x input
@@ -30,14 +32,21 @@ Spaceship::Spaceship(int ShipNumber) : heatbar(SHIP_MAX_HEAT, ShipNumber)
 	hitbox.setOrigin(SHIP_SIZE.x / 2, SHIP_SIZE.y / 2);
 	hitbox.setFillColor(sf::Color::White);
 
-	collisionBox.setRadius((SHIP_SIZE.x + SHIP_SIZE.y) / 2);
-	collisionBox.setOrigin(collisionBox.getRadius(), collisionBox.getRadius());
+	collisionBox.setRadius(SHIP_RADIUS);
+	collisionBox.setOrigin(SHIP_RADIUS, SHIP_RADIUS);
 	collisionBox.setFillColor(sf::Color::Green);
 
 	//hitbox.setPosition(WIN_X_LEN / 2, WIN_Y_LEN / 2);
 	position = sf::Vector2f(WIN_X_LEN / 2.0, WIN_Y_LEN / 2.0);
 
 	//TODO: set up ship sprites
+	texture.loadFromFile("Images/Blue Ship.png");
+	sprite.setTexture(texture);
+	sprite.setOrigin(SHIP_SIZE.x / 2, SHIP_SIZE.y / 2);
+
+	thrusterFireTexture.loadFromFile("Images/Thruster Fire.png");
+	thrusterFireSprite.setTexture(thrusterFireTexture);
+	thrusterFireSprite.setOrigin(thrusterFireTexture.getSize().x / 2, 0);
 
 	rotation = 0;
 
@@ -81,10 +90,20 @@ void Spaceship::handleInputs()
 	joyStickU /= JOYSTICK_U_MAX_VALUE * 2;
 	if (joyStickU >= JOYSTICK_THRESHOLD)
 	{
+		isThrusting = true;
+
 		//convert from degrees to radians
 		float rot = rotation * M_PI / 180;
 		velocity.x += sin(rot) * SHIP_MOVEMENT_SPEED * joyStickU;
 		velocity.y -= cos(rot) * SHIP_MOVEMENT_SPEED * joyStickU;
+
+		//show more of the thruster fire sprite if the trigger is pressed more
+		thrusterFireSprite.setOrigin(thrusterFireTexture.getSize().x / 2,
+									(-SHIP_RADIUS * 0.7 + thrusterFireTexture.getSize().y) - (thrusterFireTexture.getSize().y * joyStickU));
+	}
+	else
+	{
+		isThrusting = false;
 	}
 
 	//---firing a bullet---
@@ -177,9 +196,18 @@ void Spaceship::update()
 	//TODO: add sprite functionality
 
 	hitbox.setRotation(rotation);
+	sprite.setRotation(rotation);
+
 	position += velocity;
 	hitbox.setPosition(position);
 	collisionBox.setPosition(position);
+	sprite.setPosition(position);
+
+	if (isThrusting)
+	{
+		thrusterFireSprite.setRotation(rotation);
+		thrusterFireSprite.setPosition(position);
+	}
 
 	switch (state)
 	{
@@ -196,8 +224,13 @@ void Spaceship::update()
 
 void Spaceship::draw(sf::RenderWindow& window)
 {
+	if (isThrusting)
+	{
+		window.draw(thrusterFireSprite);
+	}
 	//window.draw(collisionBox);
-	window.draw(hitbox);
+	//window.draw(hitbox);
+	window.draw(sprite);
 
 	//draw ui
 	heatbar.draw(window);
@@ -231,14 +264,14 @@ void Spaceship::changeState(State newState)
 		hitbox.setSize(SHIP_SIZE);
 		hitbox.setOrigin(SHIP_SIZE.x / 2, SHIP_SIZE.y / 2);
 
-		collisionBox.setRadius((SHIP_SIZE.x + SHIP_SIZE.y) / 2);
+		collisionBox.setRadius(SHIP_RADIUS);
 		collisionBox.setOrigin(collisionBox.getRadius(), collisionBox.getRadius());
 		break;
 	case State::expanded:
 		hitbox.setSize(SHIP_EXPANDED_SIZE);
 		hitbox.setOrigin(SHIP_EXPANDED_SIZE.x / 2, SHIP_EXPANDED_SIZE.y / 2);
 
-		collisionBox.setRadius((SHIP_EXPANDED_SIZE.x + SHIP_EXPANDED_SIZE.y) / 2);
+		collisionBox.setRadius(SHIP_EXPANDED_RADIUS);
 		collisionBox.setOrigin(collisionBox.getRadius(), collisionBox.getRadius());
 		break;
 	}

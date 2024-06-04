@@ -14,6 +14,9 @@ public:
 	sf::RectangleShape hitbox;
 	sf::CircleShape collisionBox;
 
+	sf::Texture thrusterFireTexture;
+	sf::Sprite thrusterFireSprite;
+
 	sf::Vector2f position;
 	sf::Vector2f velocity;
 	float rotation; //in degrees
@@ -23,6 +26,8 @@ public:
 
 	int firingCooldown;
 	bool isFiring;
+
+	bool isThrusting;
 
 	int shipNumber;
 
