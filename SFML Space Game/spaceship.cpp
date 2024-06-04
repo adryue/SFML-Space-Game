@@ -4,15 +4,18 @@
 #include "spaceship.h"
 
 //const sf::Vector2f SHIP_SIZE = sf::Vector2f(5, 20);
-const sf::Vector2f SHIP_SIZE = sf::Vector2f(10, 40);
+const sf::Vector2f SHIP_SIZE(10, 40);
+const sf::Vector2f SHIP_EXPANDED_SIZE(30, 120);
 
 const float SHIP_ROTATION_SPEED = 3.5;
 const float SHIP_MOVEMENT_SPEED = 0.1;
 
 const float SHIP_MAX_HEAT = 300;
 const float SHIP_HEAT_DISSIPATION = 0.2;
+const float SHIP_HEAT_EXPANDED_DISSIPATION = 1.0;
 
 const int SHIP_FIRING_COOLDOWN = 20;
+const float SHIP_FIRING_KNOCKBACK = 0.01;
 
 const float JOYSTICK_THRESHOLD = 0.15; //the minimum value required to move (after the joystick is normalized)
 const float JOYSTICK_X_MAX_VALUE = 70; //the maximum value from joystick x input
@@ -41,6 +44,7 @@ Spaceship::Spaceship(int ShipNumber) : heatbar(SHIP_MAX_HEAT, ShipNumber)
 	heat = 0;
 
 	firingCooldown = 0;
+	isFiring = false;
 
 	shipNumber = ShipNumber;
 	switch (shipNumber)
@@ -84,11 +88,11 @@ void Spaceship::handleInputs()
 	}
 
 	//---firing a bullet---
-	if (firingCooldown == 0)
+	if (sf::Joystick::isButtonPressed(shipNumber, 1))
 	{
-		if (sf::Joystick::isButtonPressed(shipNumber, 1))
+		if (!isFiring)
 		{
-			firingCooldown = SHIP_FIRING_COOLDOWN;
+			isFiring = true;
 			Bullet b(position, velocity, rotation); //bullet has the same starting position and velocity as the ship
 
 			//get the new rotation for the bullet
@@ -107,12 +111,15 @@ void Spaceship::handleInputs()
 			b.velocity.x += sin(rot) * BULLET_SPEED;
 			b.velocity.y -= cos(rot) * BULLET_SPEED;
 
+			velocity.x -= sin(rot) * BULLET_SPEED * SHIP_FIRING_KNOCKBACK;
+			velocity.y += cos(rot) * BULLET_SPEED * SHIP_FIRING_KNOCKBACK;
+
 			addBullet(b);
 		}
 	}
 	else
 	{
-		firingCooldown--;
+		isFiring = false;
 	}
 	/*float joyStickZ = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::Z);
 	joyStickZ = std::min(joyStickZ, JOYSTICK_Z_MAX_VALUE);
@@ -146,6 +153,16 @@ void Spaceship::handleInputs()
 		addBullet(b);
 	}*/
 
+	//---changing the state---
+	if (sf::Joystick::isButtonPressed(shipNumber, 5))
+	{
+		changeState(State::expanded);
+	}
+	else
+	{
+		changeState(State::normal);
+	}
+
 	//---reset button---
 	if (sf::Joystick::isButtonPressed(shipNumber, 9))
 	{
@@ -164,7 +181,15 @@ void Spaceship::update()
 	hitbox.setPosition(position);
 	collisionBox.setPosition(position);
 
-	heat -= SHIP_HEAT_DISSIPATION;
+	switch (state)
+	{
+	case State::normal:
+		heat -= SHIP_HEAT_DISSIPATION;
+		break;
+	case State::expanded:
+		heat -= SHIP_HEAT_EXPANDED_DISSIPATION;
+		break;
+	}
 	heat = std::max(heat, 0.0f);
 	heatbar.setValue(heat);
 }
@@ -197,6 +222,27 @@ void Spaceship::damage(float amount)
 	heatbar.setValue(heat);
 }
 
+void Spaceship::changeState(State newState)
+{
+	state = newState;
+	switch (state)
+	{
+	case State::normal:
+		hitbox.setSize(SHIP_SIZE);
+		hitbox.setOrigin(SHIP_SIZE.x / 2, SHIP_SIZE.y / 2);
+
+		collisionBox.setRadius((SHIP_SIZE.x + SHIP_SIZE.y) / 2);
+		collisionBox.setOrigin(collisionBox.getRadius(), collisionBox.getRadius());
+		break;
+	case State::expanded:
+		hitbox.setSize(SHIP_EXPANDED_SIZE);
+		hitbox.setOrigin(SHIP_EXPANDED_SIZE.x / 2, SHIP_EXPANDED_SIZE.y / 2);
+
+		collisionBox.setRadius((SHIP_EXPANDED_SIZE.x + SHIP_EXPANDED_SIZE.y) / 2);
+		collisionBox.setOrigin(collisionBox.getRadius(), collisionBox.getRadius());
+		break;
+	}
+}
 
 /*
 	For gamecube controllers

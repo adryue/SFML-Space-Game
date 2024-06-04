@@ -22,9 +22,17 @@ public:
 	Healthbar heatbar;
 
 	int firingCooldown;
+	bool isFiring;
 
 	int shipNumber;
 
+	enum State
+	{
+		normal,
+		expanded
+	};
+
+	State state;
 
 	Spaceship(int ShipNumber);
 
@@ -34,4 +42,6 @@ public:
 
 	bool handleCollision(Bullet b);
 	void damage(float amount);
+
+	void changeState(State newState);
 };
