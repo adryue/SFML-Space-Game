@@ -39,7 +39,12 @@ ScreenName playScreen(sf::RenderWindow& window)
 		//update bullets
 		for (int i = 0; i < bullets.size(); i++)
 		{
-			bullets[i].update();
+			if (bullets[i].update())
+			{
+				bullets.erase(bullets.begin() + i);
+				i--;
+				continue;
+			}
 			if (ship0.handleCollision(bullets[i]) || ship1.handleCollision(bullets[i]))
 			{
 				bullets.erase(bullets.begin() + i);

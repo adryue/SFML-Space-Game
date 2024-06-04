@@ -6,15 +6,20 @@
 class Bullet
 {
 public:
-	sf::CircleShape hitbox;
+	sf::RectangleShape hitbox;
+	sf::CircleShape collisionBox;
 
 	sf::Vector2f position;
 	sf::Vector2f velocity;
 
-	Bullet(sf::Vector2f pos, sf::Vector2f vel);
+	float rotation;
+
+	float lifespan;
+
+	Bullet(sf::Vector2f pos, sf::Vector2f vel, float rot);
 	Bullet();
 
-	void update();
+	bool update(); //returns true if the bullet should despawn
 	void draw(sf::RenderWindow& window);
 };
 

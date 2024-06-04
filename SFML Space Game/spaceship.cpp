@@ -12,7 +12,7 @@ const float SHIP_MOVEMENT_SPEED = 0.1;
 const float SHIP_MAX_HEAT = 300;
 const float SHIP_HEAT_DISSIPATION = 0.2;
 
-const int SHIP_FIRING_COOLDOWN = 5;
+const int SHIP_FIRING_COOLDOWN = 20;
 
 const float JOYSTICK_THRESHOLD = 0.15; //the minimum value required to move (after the joystick is normalized)
 const float JOYSTICK_X_MAX_VALUE = 70; //the maximum value from joystick x input
@@ -84,28 +84,35 @@ void Spaceship::handleInputs()
 	}
 
 	//---firing a bullet---
-	//if (firingCooldown == 0)
-	if (sf::Joystick::isButtonPressed(shipNumber, 1))
+	if (firingCooldown == 0)
 	{
-		Bullet b(position, velocity); //bullet has the same starting position and velocity as the ship
-
-		//get the new rotation for the bullet
-		/*float joyStickRotation = atan(-joyStickR / joyStickZ);
-		if (joyStickZ < 0)
+		if (sf::Joystick::isButtonPressed(shipNumber, 1))
 		{
-			joyStickRotation += M_PI;
+			firingCooldown = SHIP_FIRING_COOLDOWN;
+			Bullet b(position, velocity, rotation); //bullet has the same starting position and velocity as the ship
+
+			//get the new rotation for the bullet
+			/*float joyStickRotation = atan(-joyStickR / joyStickZ);
+			if (joyStickZ < 0)
+			{
+				joyStickRotation += M_PI;
+			}
+			float bulletRotation = (rotation * M_PI / 180) + joyStickRotation;*/
+
+			float rot = rotation * M_PI / 180;
+
+			b.position.x += sin(rot) * collisionBox.getRadius();
+			b.position.y -= cos(rot) * collisionBox.getRadius();
+
+			b.velocity.x += sin(rot) * BULLET_SPEED;
+			b.velocity.y -= cos(rot) * BULLET_SPEED;
+
+			addBullet(b);
 		}
-		float bulletRotation = (rotation * M_PI / 180) + joyStickRotation;*/
-		
-		float rot = rotation * M_PI / 180;
-
-		b.position.x += sin(rot) * collisionBox.getRadius();
-		b.position.y -= cos(rot) * collisionBox.getRadius();
-
-		b.velocity.x += sin(rot) * BULLET_SPEED;
-		b.velocity.y -= cos(rot) * BULLET_SPEED;
-
-		addBullet(b);
+	}
+	else
+	{
+		firingCooldown--;
 	}
 	/*float joyStickZ = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::Z);
 	joyStickZ = std::min(joyStickZ, JOYSTICK_Z_MAX_VALUE);
@@ -175,7 +182,7 @@ bool Spaceship::handleCollision(Bullet b)
 {
 	float posX = b.position.x - position.x;
 	float posY = b.position.y - position.y;
-	float minDistance = b.hitbox.getRadius() + collisionBox.getRadius();
+	float minDistance = b.collisionBox.getRadius() + collisionBox.getRadius();
 	if (posX * posX + posY * posY <= minDistance * minDistance)
 	{
 		damage(BULLET_DAMAGE);
