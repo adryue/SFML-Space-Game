@@ -11,13 +11,17 @@ const float SHIP_EXPANDED_RADIUS = (SHIP_EXPANDED_SIZE.x + SHIP_EXPANDED_SIZE.y)
 
 const float SHIP_ROTATION_SPEED = 3.5;
 const float SHIP_MOVEMENT_SPEED = 0.1;
+const float SHIP_MINI_MOVEMENT_SPEED = 0.01;
 
 const float SHIP_MAX_HEAT = 300;
-const float SHIP_HEAT_DISSIPATION = 0.3;
-const float SHIP_HEAT_EXPANDED_DISSIPATION = 1.0;
+const float SHIP_HEAT_DISSIPATION = 0.5;
+const float SHIP_HEAT_EXPANDED_DISSIPATION = 1.5;
 
-const int SHIP_FIRING_COOLDOWN = 20;
-const float SHIP_FIRING_KNOCKBACK = 0.01; //multiplier value based on bullet's speed
+//const int SHIP_BULLET_FIRING_COOLDOWN = 20;
+const float SHIP_BULLET_FIRING_KNOCKBACK = 0.01; //multiplier value based on bullet's speed
+
+const float SHIP_LASER_FIRING_KNOCKBACK = 1.3; //multiplier value based on laser damage
+const int SHIP_LASER_MAX_BUILDUP = 100; //number of frames required to build up to full strength
 
 const float JOYSTICK_THRESHOLD = 0.15; //the minimum value required to move (after the joystick is normalized)
 const float JOYSTICK_X_MAX_VALUE = 70; //the maximum value from joystick x input
@@ -53,7 +57,11 @@ Spaceship::Spaceship(int ShipNumber) : heatbar(SHIP_MAX_HEAT, ShipNumber)
 	heat = 0;
 
 	firingCooldown = 0;
-	isFiring = false;
+	isFiringBullet = false;
+	laserBuildup = 0;
+	isFiringLaser = false;
+
+	isThrusting = false;
 
 	shipNumber = ShipNumber;
 	switch (shipNumber)
@@ -65,6 +73,8 @@ Spaceship::Spaceship(int ShipNumber) : heatbar(SHIP_MAX_HEAT, ShipNumber)
 		position = sf::Vector2f(WIN_X_LEN / 3.0 * 2.0, WIN_Y_LEN / 2.0);
 		break;
 	}
+
+	state = State::normal;
 }
 
 void Spaceship::handleInputs()
@@ -106,12 +116,29 @@ void Spaceship::handleInputs()
 		isThrusting = false;
 	}
 
+	//---mini thruster adjustments---
+	float joyStickZ = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::Z);
+	joyStickZ = std::min(joyStickZ, JOYSTICK_Z_MAX_VALUE);
+	joyStickZ = std::max(joyStickZ, -JOYSTICK_Z_MAX_VALUE);
+	joyStickZ /= JOYSTICK_Z_MAX_VALUE;
+	float joyStickR = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::R);
+	joyStickR = std::min(joyStickR, JOYSTICK_R_MAX_VALUE);
+	joyStickR = std::max(joyStickR, -JOYSTICK_R_MAX_VALUE);
+	joyStickR /= JOYSTICK_R_MAX_VALUE;
+
+	float joyStickZR = sqrt(joyStickZ * joyStickZ + joyStickR * joyStickR);
+	if (joyStickZR > JOYSTICK_THRESHOLD)
+	{
+		velocity.x -= SHIP_MINI_MOVEMENT_SPEED * joyStickR;
+		velocity.y -= SHIP_MINI_MOVEMENT_SPEED * joyStickZ;
+	}
+
 	//---firing a bullet---
 	if (sf::Joystick::isButtonPressed(shipNumber, 1))
 	{
-		if (!isFiring)
+		if (!isFiringBullet)
 		{
-			isFiring = true;
+			isFiringBullet = true;
 			Bullet b(position, velocity, rotation); //bullet has the same starting position and velocity as the ship
 
 			//get the new rotation for the bullet
@@ -130,15 +157,15 @@ void Spaceship::handleInputs()
 			b.velocity.x += sin(rot) * BULLET_SPEED;
 			b.velocity.y -= cos(rot) * BULLET_SPEED;
 
-			velocity.x -= sin(rot) * BULLET_SPEED * SHIP_FIRING_KNOCKBACK;
-			velocity.y += cos(rot) * BULLET_SPEED * SHIP_FIRING_KNOCKBACK;
+			velocity.x -= sin(rot) * BULLET_SPEED * SHIP_BULLET_FIRING_KNOCKBACK;
+			velocity.y += cos(rot) * BULLET_SPEED * SHIP_BULLET_FIRING_KNOCKBACK;
 
 			addBullet(b);
 		}
 	}
 	else
 	{
-		isFiring = false;
+		isFiringBullet = false;
 	}
 	/*float joyStickZ = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::Z);
 	joyStickZ = std::min(joyStickZ, JOYSTICK_Z_MAX_VALUE);
@@ -171,6 +198,35 @@ void Spaceship::handleInputs()
 		
 		addBullet(b);
 	}*/
+
+	//---firing a laser
+	if (sf::Joystick::isButtonPressed(shipNumber, 2))
+	{
+		isFiringLaser = true;
+		laserBuildup++;
+		laserBuildup = std::min(SHIP_LASER_MAX_BUILDUP, laserBuildup);
+	}
+	else
+	{
+		if (isFiringLaser)
+		{
+			isFiringLaser = false;
+			float rot = rotation * M_PI / 180;
+			float damage = (float)laserBuildup / SHIP_LASER_MAX_BUILDUP;
+
+			Laser laser(sf::Vector2f(position.x + sin(rot) * collisionBox.getRadius(),
+									 position.y - cos(rot) * collisionBox.getRadius()),
+						rotation,
+						damage);
+
+			addLaser(laser);
+
+			laserBuildup = 0;
+
+			velocity.x -= sin(rot) * damage * SHIP_LASER_FIRING_KNOCKBACK;
+			velocity.y += cos(rot) * damage * SHIP_LASER_FIRING_KNOCKBACK;
+		}
+	}
 
 	//---changing the state---
 	if (sf::Joystick::isButtonPressed(shipNumber, 5))
@@ -246,6 +302,69 @@ bool Spaceship::handleCollision(Bullet b)
 		damage(BULLET_DAMAGE);
 		return true;
 	}
+	return false;
+}
+
+/*bool Spaceship::handleCollision(Laser l, sf::RenderWindow& window)
+{
+	sf::VertexArray line;
+	line.setPrimitiveType(sf::LinesStrip);
+	line.append(sf::Vertex(position));
+	line.append(sf::Vertex(l.center));
+	window.draw(line);
+
+	float distX = l.center.x - position.x;
+	float distY = l.center.y - position.y;
+	float dist = sqrt(distX * distX + distY * distY);
+
+	float rot = l.hitbox.getRotation() * M_PI / 180;
+	float theta = (rot) - atan(distX / distY);
+	//std::cout << "rotation: " << atan(distX / distY) * 180 / M_PI << std::endl;
+	if (distY < 0)
+	{
+		//theta += M_PI;
+	}
+
+	std::cout << "(" << distX << ", " << distY << ") theta: " << theta << std::endl;
+
+	if (dist * sin(theta) < collisionBox.getRadius() + l.hitbox.getSize().x / 2 &&
+		dist * cos(theta) < collisionBox.getRadius() + l.hitbox.getSize().y / 2)
+	{
+		damage(l.damage);
+		return true;
+	}
+	return false;
+}*/
+
+bool Spaceship::handleCollision(Laser l)
+{
+	//if the laser is facing the opposite direction, it's guaranteed to not hit
+	float aX = sin(l.hitbox.getRotation() * M_PI / 180);
+	float aY = -cos(l.hitbox.getRotation() * M_PI / 180);
+
+	float bX = l.position.x - position.x;
+	float bY = l.position.y - position.y;
+
+	if (aX * bX + aY * bY > 0) //if the dot product is negative (for some reason it's positive instead)
+	{
+		return false;
+	}
+
+	//calculate the intersection point between the equation representing the laser and the normal line going through the ship's circle
+	float x = ((l.slope * l.position.x) + l.position.y + (position.x / l.slope) - position.y) / (l.slope + 1 / l.slope);
+	float y = l.slope * (l.position.x - x) + l.position.y;
+
+	//distance from the circle to the laser line
+	float distX = x - position.x;
+	float distY = y - position.y;
+	float dist = std::sqrt(distX * distX + distY * distY);
+
+	if (dist < l.size.x / 2 + collisionBox.getRadius())
+	{
+		damage(l.damage);
+		return true;
+	}
+
 	return false;
 }
 

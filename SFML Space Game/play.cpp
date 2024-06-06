@@ -4,10 +4,16 @@
 
 
 std::vector<Bullet> bullets;
+std::vector<Laser> lasers;
 
 void addBullet(Bullet bullet) //used inside the spaceship class
 {
 	bullets.push_back(bullet);
+}
+
+void addLaser(Laser laser) //used inside the spaceship class
+{
+	lasers.push_back(laser);
 }
 
 ScreenName playScreen(sf::RenderWindow& window)
@@ -52,6 +58,19 @@ ScreenName playScreen(sf::RenderWindow& window)
 			}
 		}
 
+		//update lasers
+		for (int i = 0; i < lasers.size(); i++)
+		{
+			if (lasers[i].update())
+			{
+				lasers.erase(lasers.begin() + i);
+				i--;
+				continue;
+			}
+			ship0.handleCollision(lasers[i]);
+			ship1.handleCollision(lasers[i]);
+		}
+
 		//std::cout << sf::Joystick::getAxisPosition(1, sf::Joystick::U) << " " << sf::Joystick::getAxisPosition(1, sf::Joystick::V) << std::endl;
 
 		//draw everything
@@ -60,6 +79,10 @@ ScreenName playScreen(sf::RenderWindow& window)
 		for (Bullet& b : bullets)
 		{
 			b.draw(window);
+		}
+		for (Laser& l : lasers)
+		{
+			l.draw(window);
 		}
 		window.display();
 	}

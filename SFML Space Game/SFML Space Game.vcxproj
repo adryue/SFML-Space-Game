@@ -135,6 +135,7 @@
   <ItemGroup>
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Healthbar.cpp" />
+    <ClCompile Include="Laser.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="play.cpp" />
     <ClCompile Include="spaceship.cpp" />
@@ -143,6 +144,7 @@
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="CommonDef.h" />
     <ClInclude Include="Healthbar.h" />
+    <ClInclude Include="Laser.h" />
     <ClInclude Include="play.h" />
     <ClInclude Include="spaceship.h" />
   </ItemGroup>

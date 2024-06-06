@@ -23,7 +23,6 @@ Bullet::Bullet(sf::Vector2f pos, sf::Vector2f vel, float rot)
 	velocity = vel;
 
 	rotation = rot;
-
 	lifespan = BULLET_LIFESPAN;
 }
 Bullet::Bullet()
@@ -33,6 +32,9 @@ Bullet::Bullet()
 
 	collisionBox.setRadius(BULLET_RADIUS);
 	collisionBox.setFillColor(sf::Color::Blue);
+
+	rotation = 0.0;
+	lifespan = BULLET_LIFESPAN;
 }
 
 

@@ -3,6 +3,7 @@
 #include "CommonDef.h"
 #include "play.h"
 #include "Bullet.h"
+#include "Laser.h"
 #include "Healthbar.h"
 
 class Spaceship
@@ -25,7 +26,10 @@ public:
 	Healthbar heatbar;
 
 	int firingCooldown;
-	bool isFiring;
+	bool isFiringBullet;
+
+	int laserBuildup;
+	bool isFiringLaser;
 
 	bool isThrusting;
 
@@ -46,6 +50,7 @@ public:
 	void draw(sf::RenderWindow& window);
 
 	bool handleCollision(Bullet b);
+	bool handleCollision(Laser l);
 	void damage(float amount);
 
 	void changeState(State newState);

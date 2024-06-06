@@ -25,3 +25,6 @@ extern const float SHIP_MAX_HEAT;
 extern const float BULLET_RADIUS;
 extern const float BULLET_SPEED;
 extern const float BULLET_DAMAGE;
+
+//defined in laser.cpp
+extern const float LASER_MAX_DAMAGE;
