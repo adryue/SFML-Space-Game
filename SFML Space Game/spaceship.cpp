@@ -43,7 +43,6 @@ Spaceship::Spaceship(int ShipNumber) : heatbar(SHIP_MAX_HEAT, ShipNumber)
 	//hitbox.setPosition(WIN_X_LEN / 2, WIN_Y_LEN / 2);
 	position = sf::Vector2f(WIN_X_LEN / 2.0, WIN_Y_LEN / 2.0);
 
-	//TODO: set up ship sprites
 	texture.loadFromFile("Images/Blue Ship.png");
 	sprite.setTexture(texture);
 	sprite.setOrigin(SHIP_SIZE.x / 2, SHIP_SIZE.y / 2);
@@ -79,8 +78,6 @@ Spaceship::Spaceship(int ShipNumber) : heatbar(SHIP_MAX_HEAT, ShipNumber)
 
 void Spaceship::handleInputs()
 {
-	//TODO: add sprite functionality
-	
 	//---rotating the ship---
 	float joyStickX = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::X);
 	joyStickX = std::min(joyStickX, JOYSTICK_X_MAX_VALUE);
@@ -129,8 +126,11 @@ void Spaceship::handleInputs()
 	float joyStickZR = sqrt(joyStickZ * joyStickZ + joyStickR * joyStickR);
 	if (joyStickZR > JOYSTICK_THRESHOLD)
 	{
-		velocity.x -= SHIP_MINI_MOVEMENT_SPEED * joyStickR;
-		velocity.y -= SHIP_MINI_MOVEMENT_SPEED * joyStickZ;
+		//velocity.x -= SHIP_MINI_MOVEMENT_SPEED * joyStickR;
+		//velocity.y -= SHIP_MINI_MOVEMENT_SPEED * joyStickZ;
+
+		position.x -= SHIP_MOVEMENT_SPEED * joyStickR * 100;
+		position.y -= SHIP_MOVEMENT_SPEED * joyStickZ * 100;
 	}
 
 	//---firing a bullet---
@@ -228,6 +228,7 @@ void Spaceship::handleInputs()
 		}
 	}
 
+	//TODO: make heat shield look better
 	//---changing the state---
 	if (sf::Joystick::isButtonPressed(shipNumber, 5))
 	{
@@ -249,8 +250,6 @@ void Spaceship::handleInputs()
 
 void Spaceship::update()
 {
-	//TODO: add sprite functionality
-
 	hitbox.setRotation(rotation);
 	sprite.setRotation(rotation);
 
@@ -287,9 +286,12 @@ void Spaceship::draw(sf::RenderWindow& window)
 	//window.draw(collisionBox);
 	//window.draw(hitbox);
 	window.draw(sprite);
+}
 
-	//draw ui
+void Spaceship::drawUI(sf::RenderWindow& window)
+{
 	heatbar.draw(window);
+
 }
 
 bool Spaceship::handleCollision(Bullet b)

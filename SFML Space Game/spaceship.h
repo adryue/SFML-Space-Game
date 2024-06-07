@@ -48,6 +48,7 @@ public:
 	void handleInputs();
 	void update();
 	void draw(sf::RenderWindow& window);
+	void drawUI(sf::RenderWindow& window);
 
 	bool handleCollision(Bullet b);
 	bool handleCollision(Laser l);

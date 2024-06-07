@@ -26,10 +26,6 @@ Laser::Laser(sf::Vector2f pos, float rot, float pwr)
 	center.y = pos.y - cos(rot * M_PI / 180) * (LASER_MAX_SIZE.y / 2);
 
 	slope = 1 / tan(rot * M_PI / 180);
-
-	std::cout << "position: " << pos.x << ", " << pos.y << std::endl;
-	std::cout << "center: " << center.x << ", " << center.y << std::endl;
-	std::cout << "slope: " << slope << std::endl;
 }
 
 bool Laser::update()

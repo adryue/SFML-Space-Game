@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "CommonDef.h"
+#include "Camera.h"
 #include "spaceship.h"
 #include "Bullet.h"
 #include "Laser.h"

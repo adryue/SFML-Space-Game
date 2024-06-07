@@ -2,7 +2,6 @@
 #include <vector>
 #include "play.h"
 
-
 std::vector<Bullet> bullets;
 std::vector<Laser> lasers;
 
@@ -18,9 +17,21 @@ void addLaser(Laser laser) //used inside the spaceship class
 
 ScreenName playScreen(sf::RenderWindow& window)
 {
+	sf::Texture backgroundTexture;
+	backgroundTexture.loadFromFile("Images/background.png");
+	backgroundTexture.setRepeated(true);
+	sf::Sprite background;
+	background.setTexture(backgroundTexture);
+	background.setTextureRect(sf::IntRect(0, 0, 100000, 100000));
+
 	Spaceship ship0(0);
 	Spaceship ship1(1);
 
+	//TODO: add dynamic camera
+	Camera camera(2);
+
+	//TODO: add asteroids
+	
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -33,7 +44,7 @@ ScreenName playScreen(sf::RenderWindow& window)
 			}
 		}
 		window.clear();
-
+		
 		//ship inputs
 		ship0.handleInputs();
 		ship1.handleInputs();
@@ -74,6 +85,13 @@ ScreenName playScreen(sf::RenderWindow& window)
 		//std::cout << sf::Joystick::getAxisPosition(1, sf::Joystick::U) << " " << sf::Joystick::getAxisPosition(1, sf::Joystick::V) << std::endl;
 
 		//draw everything
+		camera.coordinates[0] = ship0.position;
+		camera.coordinates[1] = ship1.position;
+		camera.updateView();
+		window.setView(camera.view);
+
+		window.draw(background);
+
 		ship0.draw(window);
 		ship1.draw(window);
 		for (Bullet& b : bullets)
@@ -84,6 +102,10 @@ ScreenName playScreen(sf::RenderWindow& window)
 		{
 			l.draw(window);
 		}
+
+		window.setView(window.getDefaultView());
+		ship0.drawUI(window);
+		ship1.drawUI(window);
 		window.display();
 	}
 

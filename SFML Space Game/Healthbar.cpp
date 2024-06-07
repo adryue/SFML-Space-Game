@@ -5,6 +5,8 @@ const sf::Vector2f HEALTHBAR_MAX_SIZE(300.0, 30.0);
 
 Healthbar::Healthbar(float maxVal, int orientation)
 {
+	//TODO: make health bar look better
+
 	bar.setFillColor(sf::Color::Yellow);
 	bar.setSize(sf::Vector2f(0, HEALTHBAR_MAX_SIZE.y));
 

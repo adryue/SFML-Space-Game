@@ -15,6 +15,8 @@ int main()
 
 	while (nextScreen != ScreenName::none)
 	{
+		window.setView(window.getDefaultView());
+
 		switch (nextScreen)
 		{
 		case ScreenName::home:
