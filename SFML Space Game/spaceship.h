@@ -33,6 +33,8 @@ public:
 
 	bool isThrusting;
 
+	float heatDissipationMultiplier;
+
 	int shipNumber;
 
 	enum State

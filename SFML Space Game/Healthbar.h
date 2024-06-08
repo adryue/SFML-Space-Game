@@ -5,6 +5,7 @@
 class Healthbar
 {
 public:
+	sf::RectangleShape outline;
 	sf::RectangleShape bar;
 	
 	float value;

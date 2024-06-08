@@ -27,7 +27,6 @@ ScreenName playScreen(sf::RenderWindow& window)
 	Spaceship ship0(0);
 	Spaceship ship1(1);
 
-	//TODO: add dynamic camera
 	Camera camera(2);
 
 	//TODO: add asteroids

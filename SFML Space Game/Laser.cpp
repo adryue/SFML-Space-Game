@@ -5,7 +5,7 @@
 
 const sf::Vector2f LASER_MAX_SIZE(20.0, 10000.0); //the y value is an arbitrary large number
 
-const float LASER_MAX_DAMAGE = 30.0;
+const float LASER_MAX_DAMAGE = 8.0;
 const float LASER_FADE_SPEED = 0.2; //size that laser shrinks by per frame
 
 Laser::Laser(sf::Vector2f pos, float rot, float pwr)

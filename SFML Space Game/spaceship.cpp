@@ -6,8 +6,8 @@
 //const sf::Vector2f SHIP_SIZE = sf::Vector2f(5, 20);
 const sf::Vector2f SHIP_SIZE(40, 40);
 const float SHIP_RADIUS = (SHIP_SIZE.x + SHIP_SIZE.y) / 4; //used for calculating collisions
-const sf::Vector2f SHIP_EXPANDED_SIZE(80, 80);
-const float SHIP_EXPANDED_RADIUS = (SHIP_EXPANDED_SIZE.x + SHIP_EXPANDED_SIZE.y) / 4;
+const sf::Vector2f SHIP_EXPANDED_MAX_SIZE(160, 160);
+const float SHIP_EXPANDED_MAX_RADIUS = (SHIP_EXPANDED_MAX_SIZE.x + SHIP_EXPANDED_MAX_SIZE.y) / 4;
 
 const float SHIP_ROTATION_SPEED = 3.5;
 const float SHIP_MOVEMENT_SPEED = 0.1;
@@ -15,7 +15,7 @@ const float SHIP_MINI_MOVEMENT_SPEED = 0.01;
 
 const float SHIP_MAX_HEAT = 300;
 const float SHIP_HEAT_DISSIPATION = 0.5;
-const float SHIP_HEAT_EXPANDED_DISSIPATION = 1.5;
+const float SHIP_HEAT_EXPANDED_MAX_DISSIPATION = 1.0;
 
 //const int SHIP_BULLET_FIRING_COOLDOWN = 20;
 const float SHIP_BULLET_FIRING_KNOCKBACK = 0.01; //multiplier value based on bullet's speed
@@ -28,6 +28,7 @@ const float JOYSTICK_X_MAX_VALUE = 70; //the maximum value from joystick x input
 const float JOYSTICK_Z_MAX_VALUE = 60; //the maximum value from joystick Z input
 const float JOYSTICK_R_MAX_VALUE = 60; //the maximum value from joystick R input
 const float JOYSTICK_U_MAX_VALUE = 75;
+const float JOYSTICK_V_MAX_VALUE = 75;
 
 
 Spaceship::Spaceship(int ShipNumber) : heatbar(SHIP_MAX_HEAT, ShipNumber)
@@ -38,7 +39,9 @@ Spaceship::Spaceship(int ShipNumber) : heatbar(SHIP_MAX_HEAT, ShipNumber)
 
 	collisionBox.setRadius(SHIP_RADIUS);
 	collisionBox.setOrigin(SHIP_RADIUS, SHIP_RADIUS);
-	collisionBox.setFillColor(sf::Color::Green);
+	collisionBox.setFillColor(sf::Color(100, 100, 100));
+	collisionBox.setOutlineThickness(3.0);
+	collisionBox.setOutlineColor(sf::Color::White);
 
 	//hitbox.setPosition(WIN_X_LEN / 2, WIN_Y_LEN / 2);
 	position = sf::Vector2f(WIN_X_LEN / 2.0, WIN_Y_LEN / 2.0);
@@ -61,6 +64,8 @@ Spaceship::Spaceship(int ShipNumber) : heatbar(SHIP_MAX_HEAT, ShipNumber)
 	isFiringLaser = false;
 
 	isThrusting = false;
+
+	heatDissipationMultiplier = 0;
 
 	shipNumber = ShipNumber;
 	switch (shipNumber)
@@ -126,11 +131,11 @@ void Spaceship::handleInputs()
 	float joyStickZR = sqrt(joyStickZ * joyStickZ + joyStickR * joyStickR);
 	if (joyStickZR > JOYSTICK_THRESHOLD)
 	{
-		//velocity.x -= SHIP_MINI_MOVEMENT_SPEED * joyStickR;
-		//velocity.y -= SHIP_MINI_MOVEMENT_SPEED * joyStickZ;
+		velocity.x -= SHIP_MINI_MOVEMENT_SPEED * joyStickR;
+		velocity.y -= SHIP_MINI_MOVEMENT_SPEED * joyStickZ;
 
-		position.x -= SHIP_MOVEMENT_SPEED * joyStickR * 100;
-		position.y -= SHIP_MOVEMENT_SPEED * joyStickZ * 100;
+		//position.x -= SHIP_MOVEMENT_SPEED * joyStickR * 100;
+		//position.y -= SHIP_MOVEMENT_SPEED * joyStickZ * 100;
 	}
 
 	//---firing a bullet---
@@ -140,14 +145,6 @@ void Spaceship::handleInputs()
 		{
 			isFiringBullet = true;
 			Bullet b(position, velocity, rotation); //bullet has the same starting position and velocity as the ship
-
-			//get the new rotation for the bullet
-			/*float joyStickRotation = atan(-joyStickR / joyStickZ);
-			if (joyStickZ < 0)
-			{
-				joyStickRotation += M_PI;
-			}
-			float bulletRotation = (rotation * M_PI / 180) + joyStickRotation;*/
 
 			float rot = rotation * M_PI / 180;
 
@@ -230,13 +227,32 @@ void Spaceship::handleInputs()
 
 	//TODO: make heat shield look better
 	//---changing the state---
-	if (sf::Joystick::isButtonPressed(shipNumber, 5))
+	float joyStickV = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::V);
+	joyStickV += JOYSTICK_V_MAX_VALUE;
+	joyStickV = std::min(joyStickV, JOYSTICK_V_MAX_VALUE * 2);
+	joyStickV = std::max(joyStickV, 0.0f);
+	joyStickV /= JOYSTICK_U_MAX_VALUE * 2;
+	if (joyStickV >= JOYSTICK_THRESHOLD)
 	{
-		changeState(State::expanded);
+		hitbox.setSize(sf::Vector2f(SHIP_SIZE.x + SHIP_EXPANDED_MAX_SIZE.x * joyStickV,
+									SHIP_SIZE.y + SHIP_EXPANDED_MAX_SIZE.y * joyStickV));
+		hitbox.setOrigin(hitbox.getSize().x / 2, hitbox.getSize().y / 2);
+
+		collisionBox.setRadius(SHIP_RADIUS + SHIP_EXPANDED_MAX_RADIUS * joyStickV);
+		collisionBox.setOrigin(collisionBox.getRadius(), collisionBox.getRadius());
+		
+		heatDissipationMultiplier = joyStickV;
+		state = State::expanded;
 	}
 	else
 	{
-		changeState(State::normal);
+		hitbox.setSize(SHIP_SIZE);
+		hitbox.setOrigin(hitbox.getSize().x / 2, hitbox.getSize().y / 2);
+
+		collisionBox.setRadius(SHIP_RADIUS);
+		collisionBox.setOrigin(collisionBox.getRadius(), collisionBox.getRadius());
+
+		state = State::normal;
 	}
 
 	//---reset button---
@@ -270,7 +286,8 @@ void Spaceship::update()
 		heat -= SHIP_HEAT_DISSIPATION;
 		break;
 	case State::expanded:
-		heat -= SHIP_HEAT_EXPANDED_DISSIPATION;
+		std::cout << heatDissipationMultiplier << std::endl;
+		heat -= SHIP_HEAT_DISSIPATION + SHIP_HEAT_EXPANDED_MAX_DISSIPATION * heatDissipationMultiplier;
 		break;
 	}
 	heat = std::max(heat, 0.0f);
@@ -279,6 +296,14 @@ void Spaceship::update()
 
 void Spaceship::draw(sf::RenderWindow& window)
 {
+	switch (state)
+	{
+	case State::normal:
+		break;
+	case State::expanded:
+		window.draw(collisionBox);
+		break;
+	}
 	if (isThrusting)
 	{
 		window.draw(thrusterFireSprite);
@@ -291,7 +316,6 @@ void Spaceship::draw(sf::RenderWindow& window)
 void Spaceship::drawUI(sf::RenderWindow& window)
 {
 	heatbar.draw(window);
-
 }
 
 bool Spaceship::handleCollision(Bullet b)
@@ -306,37 +330,6 @@ bool Spaceship::handleCollision(Bullet b)
 	}
 	return false;
 }
-
-/*bool Spaceship::handleCollision(Laser l, sf::RenderWindow& window)
-{
-	sf::VertexArray line;
-	line.setPrimitiveType(sf::LinesStrip);
-	line.append(sf::Vertex(position));
-	line.append(sf::Vertex(l.center));
-	window.draw(line);
-
-	float distX = l.center.x - position.x;
-	float distY = l.center.y - position.y;
-	float dist = sqrt(distX * distX + distY * distY);
-
-	float rot = l.hitbox.getRotation() * M_PI / 180;
-	float theta = (rot) - atan(distX / distY);
-	//std::cout << "rotation: " << atan(distX / distY) * 180 / M_PI << std::endl;
-	if (distY < 0)
-	{
-		//theta += M_PI;
-	}
-
-	std::cout << "(" << distX << ", " << distY << ") theta: " << theta << std::endl;
-
-	if (dist * sin(theta) < collisionBox.getRadius() + l.hitbox.getSize().x / 2 &&
-		dist * cos(theta) < collisionBox.getRadius() + l.hitbox.getSize().y / 2)
-	{
-		damage(l.damage);
-		return true;
-	}
-	return false;
-}*/
 
 bool Spaceship::handleCollision(Laser l)
 {
@@ -389,10 +382,10 @@ void Spaceship::changeState(State newState)
 		collisionBox.setOrigin(collisionBox.getRadius(), collisionBox.getRadius());
 		break;
 	case State::expanded:
-		hitbox.setSize(SHIP_EXPANDED_SIZE);
-		hitbox.setOrigin(SHIP_EXPANDED_SIZE.x / 2, SHIP_EXPANDED_SIZE.y / 2);
+		hitbox.setSize(SHIP_EXPANDED_MAX_SIZE);
+		hitbox.setOrigin(SHIP_EXPANDED_MAX_SIZE.x / 2, SHIP_EXPANDED_MAX_SIZE.y / 2);
 
-		collisionBox.setRadius(SHIP_EXPANDED_RADIUS);
+		collisionBox.setRadius(SHIP_EXPANDED_MAX_RADIUS);
 		collisionBox.setOrigin(collisionBox.getRadius(), collisionBox.getRadius());
 		break;
 	}
