@@ -36,6 +36,9 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Background.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonDef.h">
@@ -59,5 +62,25 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Background.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Images\Blue Ship.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\Thruster Fire.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\Background 0.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\Background 1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\Background 2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

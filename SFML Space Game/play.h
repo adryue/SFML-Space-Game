@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "CommonDef.h"
 #include "Camera.h"
+#include "Background.h"
 #include "spaceship.h"
 #include "Bullet.h"
 #include "Laser.h"

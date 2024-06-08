@@ -286,7 +286,6 @@ void Spaceship::update()
 		heat -= SHIP_HEAT_DISSIPATION;
 		break;
 	case State::expanded:
-		std::cout << heatDissipationMultiplier << std::endl;
 		heat -= SHIP_HEAT_DISSIPATION + SHIP_HEAT_EXPANDED_MAX_DISSIPATION * heatDissipationMultiplier;
 		break;
 	}

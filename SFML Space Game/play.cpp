@@ -17,17 +17,29 @@ void addLaser(Laser laser) //used inside the spaceship class
 
 ScreenName playScreen(sf::RenderWindow& window)
 {
-	sf::Texture backgroundTexture;
+	/*sf::Texture backgroundTexture;
 	backgroundTexture.loadFromFile("Images/background.png");
 	backgroundTexture.setRepeated(true);
 	sf::Sprite background;
 	background.setTexture(backgroundTexture);
-	background.setTextureRect(sf::IntRect(0, 0, 100000, 100000));
+	background.setTextureRect(sf::IntRect(0, 0, 100000, 100000));*/
+
+	std::vector<Background> backgrounds;
+	//note: you have to create the background variable before putting it into the vector
+	//because you need to keep the instance of the texture
+	Background bg0(0, 0.9);
+	Background bg1(1, 0.5);
+	Background bg2(2, 0.2);
+	backgrounds.push_back(bg0); 
+	backgrounds.push_back(bg1); 
+	backgrounds.push_back(bg2);
+	//backgrounds.push_back(Background(1, 0.0));
+	//backgrounds.push_back(Background(2, 1.0));
 
 	Spaceship ship0(0);
 	Spaceship ship1(1);
 
-	Camera camera(2);
+	Camera camera(2); //2 for the number of spaceships
 
 	//TODO: add asteroids
 	
@@ -44,15 +56,15 @@ ScreenName playScreen(sf::RenderWindow& window)
 		}
 		window.clear();
 		
-		//ship inputs
+		//---ship inputs---
 		ship0.handleInputs();
 		ship1.handleInputs();
 
-		//update ship positions
+		//---update ship positions---
 		ship0.update();
 		ship1.update();
 
-		//update bullets
+		//---update bullets---
 		for (int i = 0; i < bullets.size(); i++)
 		{
 			if (bullets[i].update())
@@ -68,7 +80,7 @@ ScreenName playScreen(sf::RenderWindow& window)
 			}
 		}
 
-		//update lasers
+		//---update lasers---
 		for (int i = 0; i < lasers.size(); i++)
 		{
 			if (lasers[i].update())
@@ -81,30 +93,37 @@ ScreenName playScreen(sf::RenderWindow& window)
 			ship1.handleCollision(lasers[i]);
 		}
 
-		//std::cout << sf::Joystick::getAxisPosition(1, sf::Joystick::U) << " " << sf::Joystick::getAxisPosition(1, sf::Joystick::V) << std::endl;
-
-		//draw everything
+		//---draw everything---
+		//update the camera view
 		camera.coordinates[0] = ship0.position;
 		camera.coordinates[1] = ship1.position;
 		camera.updateView();
 		window.setView(camera.view);
-
-		window.draw(background);
-
+		//draw backgrounds
+		//window.draw(background);
+		for (Background& b : backgrounds)
+		{
+			b.update(camera.view.getCenter());
+			b.draw(window);
+		}
+		//draw ships
 		ship0.draw(window);
 		ship1.draw(window);
+		//draw bullets
 		for (Bullet& b : bullets)
 		{
 			b.draw(window);
 		}
+		//draw lasers
 		for (Laser& l : lasers)
 		{
 			l.draw(window);
 		}
-
+		//draw ui
 		window.setView(window.getDefaultView());
 		ship0.drawUI(window);
 		ship1.drawUI(window);
+
 		window.display();
 	}
 

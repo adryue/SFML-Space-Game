@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Background.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Healthbar.cpp" />
@@ -142,6 +143,7 @@
     <ClCompile Include="spaceship.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Background.h" />
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommonDef.h" />
@@ -149,6 +151,13 @@
     <ClInclude Include="Laser.h" />
     <ClInclude Include="play.h" />
     <ClInclude Include="spaceship.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Images\Background 0.png" />
+    <Image Include="Images\Background 1.png" />
+    <Image Include="Images\Background 2.png" />
+    <Image Include="Images\Blue Ship.png" />
+    <Image Include="Images\Thruster Fire.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
