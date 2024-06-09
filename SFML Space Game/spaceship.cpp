@@ -3,7 +3,6 @@
 #include <iostream>
 #include "spaceship.h"
 
-//const sf::Vector2f SHIP_SIZE = sf::Vector2f(5, 20);
 const sf::Vector2f SHIP_SIZE(40, 40);
 const float SHIP_RADIUS = (SHIP_SIZE.x + SHIP_SIZE.y) / 4; //used for calculating collisions
 const sf::Vector2f SHIP_EXPANDED_MAX_SIZE(160, 160);
@@ -22,6 +21,7 @@ const float SHIP_BULLET_FIRING_KNOCKBACK = 0.01; //multiplier value based on bul
 
 const float SHIP_LASER_FIRING_KNOCKBACK = 1.3; //multiplier value based on laser damage
 const int SHIP_LASER_MAX_BUILDUP = 100; //number of frames required to build up to full strength
+const float SHIP_LASER_BUILDUP_MAX_HEAT = 1.0; //when charging up the laser, the ship gains heat
 
 const float JOYSTICK_THRESHOLD = 0.15; //the minimum value required to move (after the joystick is normalized)
 const float JOYSTICK_X_MAX_VALUE = 70; //the maximum value from joystick x input
@@ -31,15 +31,19 @@ const float JOYSTICK_U_MAX_VALUE = 75;
 const float JOYSTICK_V_MAX_VALUE = 75;
 
 
-Spaceship::Spaceship(int ShipNumber) : heatbar(SHIP_MAX_HEAT, ShipNumber)
+Spaceship::Spaceship(int ShipNumber) : heatBar(HEATBAR_MAX_SIZE, SHIP_MAX_HEAT, ShipNumber, 0, 0.f),
+									   laserBar(LASERBAR_MAX_SIZE, SHIP_LASER_MAX_BUILDUP, ShipNumber, 1, HEATBAR_MAX_SIZE.y)
 {
+	heatBar.setMinMaxColors(sf::Color(255, 255, 0), sf::Color(255, 0, 0));
+	laserBar.setMinMaxColors(sf::Color::Cyan, sf::Color::Cyan);
+
 	hitbox.setSize(SHIP_SIZE);
 	hitbox.setOrigin(SHIP_SIZE.x / 2, SHIP_SIZE.y / 2);
 	hitbox.setFillColor(sf::Color::White);
 
 	collisionBox.setRadius(SHIP_RADIUS);
 	collisionBox.setOrigin(SHIP_RADIUS, SHIP_RADIUS);
-	collisionBox.setFillColor(sf::Color(100, 100, 100));
+	collisionBox.setFillColor(sf::Color(100, 100, 100, 100));
 	collisionBox.setOutlineThickness(3.0);
 	collisionBox.setOutlineColor(sf::Color::White);
 
@@ -138,32 +142,6 @@ void Spaceship::handleInputs()
 		//position.y -= SHIP_MOVEMENT_SPEED * joyStickZ * 100;
 	}
 
-	//---firing a bullet---
-	if (sf::Joystick::isButtonPressed(shipNumber, 1))
-	{
-		if (!isFiringBullet)
-		{
-			isFiringBullet = true;
-			Bullet b(position, velocity, rotation); //bullet has the same starting position and velocity as the ship
-
-			float rot = rotation * M_PI / 180;
-
-			b.position.x += sin(rot) * collisionBox.getRadius();
-			b.position.y -= cos(rot) * collisionBox.getRadius();
-
-			b.velocity.x += sin(rot) * BULLET_SPEED;
-			b.velocity.y -= cos(rot) * BULLET_SPEED;
-
-			velocity.x -= sin(rot) * BULLET_SPEED * SHIP_BULLET_FIRING_KNOCKBACK;
-			velocity.y += cos(rot) * BULLET_SPEED * SHIP_BULLET_FIRING_KNOCKBACK;
-
-			addBullet(b);
-		}
-	}
-	else
-	{
-		isFiringBullet = false;
-	}
 	/*float joyStickZ = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::Z);
 	joyStickZ = std::min(joyStickZ, JOYSTICK_Z_MAX_VALUE);
 	joyStickZ = std::max(joyStickZ, -JOYSTICK_Z_MAX_VALUE);
@@ -196,37 +174,7 @@ void Spaceship::handleInputs()
 		addBullet(b);
 	}*/
 
-	//---firing a laser
-	if (sf::Joystick::isButtonPressed(shipNumber, 2))
-	{
-		isFiringLaser = true;
-		laserBuildup++;
-		laserBuildup = std::min(SHIP_LASER_MAX_BUILDUP, laserBuildup);
-	}
-	else
-	{
-		if (isFiringLaser)
-		{
-			isFiringLaser = false;
-			float rot = rotation * M_PI / 180;
-			float damage = (float)laserBuildup / SHIP_LASER_MAX_BUILDUP;
-
-			Laser laser(sf::Vector2f(position.x + sin(rot) * collisionBox.getRadius(),
-									 position.y - cos(rot) * collisionBox.getRadius()),
-						rotation,
-						damage);
-
-			addLaser(laser);
-
-			laserBuildup = 0;
-
-			velocity.x -= sin(rot) * damage * SHIP_LASER_FIRING_KNOCKBACK;
-			velocity.y += cos(rot) * damage * SHIP_LASER_FIRING_KNOCKBACK;
-		}
-	}
-
-	//TODO: make heat shield look better
-	//---changing the state---
+	//---changing the state to normal / expanded---
 	float joyStickV = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::V);
 	joyStickV += JOYSTICK_V_MAX_VALUE;
 	joyStickV = std::min(joyStickV, JOYSTICK_V_MAX_VALUE * 2);
@@ -243,6 +191,10 @@ void Spaceship::handleInputs()
 		
 		heatDissipationMultiplier = joyStickV;
 		state = State::expanded;
+
+		//reset values for firing lasers
+		laserBuildup = 0;
+		laserBar.setValue(0);
 	}
 	else
 	{
@@ -253,6 +205,72 @@ void Spaceship::handleInputs()
 		collisionBox.setOrigin(collisionBox.getRadius(), collisionBox.getRadius());
 
 		state = State::normal;
+
+		//the ship can only fire if it is not expanded
+		
+		//---firing a bullet---
+		if (sf::Joystick::isButtonPressed(shipNumber, 1))
+		{
+			if (!isFiringBullet)
+			{
+				isFiringBullet = true;
+				Bullet b(position, velocity, rotation); //bullet has the same starting position and velocity as the ship
+
+				float rot = rotation * M_PI / 180;
+
+				b.position.x += sin(rot) * collisionBox.getRadius();
+				b.position.y -= cos(rot) * collisionBox.getRadius();
+
+				b.velocity.x += sin(rot) * BULLET_SPEED;
+				b.velocity.y -= cos(rot) * BULLET_SPEED;
+
+				//ship gets knockback
+				velocity.x -= sin(rot) * BULLET_SPEED * SHIP_BULLET_FIRING_KNOCKBACK;
+				velocity.y += cos(rot) * BULLET_SPEED * SHIP_BULLET_FIRING_KNOCKBACK;
+
+				addBullet(b);
+			}
+		}
+		else
+		{
+			isFiringBullet = false;
+		}
+
+		//---firing a laser
+		if (sf::Joystick::isButtonPressed(shipNumber, 2))
+		{
+			isFiringLaser = true;
+			laserBuildup++;
+			laserBuildup = std::min(SHIP_LASER_MAX_BUILDUP, laserBuildup);
+
+			laserBar.setValue(laserBuildup);
+
+			//charging up the laser also adds heat
+			damage(SHIP_LASER_BUILDUP_MAX_HEAT * ((float)laserBuildup / SHIP_LASER_MAX_BUILDUP));
+		}
+		else
+		{
+			if (isFiringLaser)
+			{
+				isFiringLaser = false;
+				float rot = rotation * M_PI / 180;
+				float damage = (float)laserBuildup / SHIP_LASER_MAX_BUILDUP;
+
+				Laser laser(sf::Vector2f(position.x + sin(rot) * collisionBox.getRadius(),
+							position.y - cos(rot) * collisionBox.getRadius()),
+							rotation,
+							damage);
+
+				addLaser(laser);
+
+				laserBuildup = 0;
+				laserBar.setValue(0);
+
+				//ship gets knockback
+				velocity.x -= sin(rot) * damage * SHIP_LASER_FIRING_KNOCKBACK;
+				velocity.y += cos(rot) * damage * SHIP_LASER_FIRING_KNOCKBACK;
+			}
+		}
 	}
 
 	//---reset button---
@@ -290,7 +308,7 @@ void Spaceship::update()
 		break;
 	}
 	heat = std::max(heat, 0.0f);
-	heatbar.setValue(heat);
+	heatBar.setValue(heat);
 }
 
 void Spaceship::draw(sf::RenderWindow& window)
@@ -314,7 +332,8 @@ void Spaceship::draw(sf::RenderWindow& window)
 
 void Spaceship::drawUI(sf::RenderWindow& window)
 {
-	heatbar.draw(window);
+	heatBar.draw(window);
+	laserBar.draw(window);
 }
 
 bool Spaceship::handleCollision(Bullet b)
@@ -365,7 +384,7 @@ bool Spaceship::handleCollision(Laser l)
 void Spaceship::damage(float amount)
 {
 	heat += amount;
-	heatbar.setValue(heat);
+	heatBar.setValue(heat);
 }
 
 void Spaceship::changeState(State newState)

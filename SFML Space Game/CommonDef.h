@@ -21,10 +21,14 @@ extern const float SHIP_MOVEMENT_SPEED;
 
 extern const float SHIP_MAX_HEAT;
 
-//defined in bullet.cpp
+//defined in Bullet.cpp
 extern const float BULLET_RADIUS;
 extern const float BULLET_SPEED;
 extern const float BULLET_DAMAGE;
 
-//defined in laser.cpp
+//defined in Laser.cpp
 extern const float LASER_MAX_DAMAGE;
+
+//defined in Healthbar.cpp
+extern const sf::Vector2f HEATBAR_MAX_SIZE;
+extern const sf::Vector2f LASERBAR_MAX_SIZE;

@@ -23,13 +23,14 @@ public:
 	float rotation; //in degrees
 
 	float heat;
-	Healthbar heatbar;
+	Healthbar heatBar;
 
 	int firingCooldown;
 	bool isFiringBullet;
 
 	int laserBuildup;
 	bool isFiringLaser;
+	Healthbar laserBar;
 
 	bool isThrusting;
 

@@ -27,12 +27,12 @@ ScreenName playScreen(sf::RenderWindow& window)
 	std::vector<Background> backgrounds;
 	//note: you have to create the background variable before putting it into the vector
 	//because you need to keep the instance of the texture
-	Background bg0(0, 0.9);
-	Background bg1(1, 0.5);
-	Background bg2(2, 0.2);
+	Background bg0(0, 0.9, 1.0);
+	Background bg1(1, 0.5, 0.5);
+	Background bg2(2, 0.2, 0.5);
 	backgrounds.push_back(bg0); 
-	backgrounds.push_back(bg1); 
-	backgrounds.push_back(bg2);
+	//backgrounds.push_back(bg1); 
+	//backgrounds.push_back(bg2);
 	//backgrounds.push_back(Background(1, 0.0));
 	//backgrounds.push_back(Background(2, 1.0));
 

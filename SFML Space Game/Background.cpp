@@ -1,10 +1,11 @@
 #include "Background.h"
 
-Background::Background(int backgroundNum, float intens)
+Background::Background(int backgroundNum, float intens, float opacity)
 {
 	texture.loadFromFile("Images/Background " + std::to_string(backgroundNum) + ".png");
 	texture.setRepeated(true);
 	sprite.setTexture(texture);
+	sprite.setColor(sf::Color(255, 255, 255, 255.0 * opacity));
 	sprite.setTextureRect(sf::IntRect(0, 0, 100000, 100000));
 	sprite.setPosition(0, 0);
 

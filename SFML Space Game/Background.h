@@ -9,7 +9,7 @@ public:
 
 	float intensity;
 
-	Background(int backgroundNum, float intens);
+	Background(int backgroundNum, float intens, float opacity);
 
 	void update(sf::Vector2f camPosition);
 	void draw(sf::RenderWindow& window);
