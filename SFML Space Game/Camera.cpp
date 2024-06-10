@@ -102,3 +102,12 @@ void Camera::updateView()
 	}
 
 }
+
+sf::Vector2f Camera::getRelativePosition(int index)
+{
+	//the coordinate shifted left by the camera's left side coordinate,
+	// divided by the length of the camera,
+	// multiplied by the size of the window
+	return sf::Vector2f((coordinates[index].x - (view.getCenter().x - view.getSize().x / 2)) / view.getSize().x * WIN_X_LEN,
+						(coordinates[index].y - (view.getCenter().y - view.getSize().y / 2)) / view.getSize().y * WIN_Y_LEN);
+}

@@ -8,6 +8,9 @@ const float SHIP_RADIUS = (SHIP_SIZE.x + SHIP_SIZE.y) / 4; //used for calculatin
 const sf::Vector2f SHIP_EXPANDED_MAX_SIZE(160, 160);
 const float SHIP_EXPANDED_MAX_RADIUS = (SHIP_EXPANDED_MAX_SIZE.x + SHIP_EXPANDED_MAX_SIZE.y) / 4;
 
+const sf::Vector2f SHIP_MARKER_SIZE(10.0, 20.0);
+const float SHIP_MARKER_OFFSET = 40.0; //offset from the ship's position
+
 const float SHIP_ROTATION_SPEED = 3.5;
 const float SHIP_MOVEMENT_SPEED = 0.1;
 const float SHIP_MINI_MOVEMENT_SPEED = 0.01;
@@ -35,6 +38,7 @@ Spaceship::Spaceship(int ShipNumber) : heatBar(HEATBAR_MAX_SIZE, SHIP_MAX_HEAT, 
 									   laserBar(LASERBAR_MAX_SIZE, SHIP_LASER_MAX_BUILDUP, ShipNumber, 1, HEATBAR_MAX_SIZE.y)
 {
 	heatBar.setMinMaxColors(sf::Color(255, 255, 0), sf::Color(255, 0, 0));
+	//heatBar.setMinMaxColors(sf::Color(255, 255, 255), sf::Color(255, 0, 0));
 	laserBar.setMinMaxColors(sf::Color::Cyan, sf::Color::Cyan);
 
 	hitbox.setSize(SHIP_SIZE);
@@ -54,6 +58,14 @@ Spaceship::Spaceship(int ShipNumber) : heatBar(HEATBAR_MAX_SIZE, SHIP_MAX_HEAT, 
 	sprite.setTexture(texture);
 	sprite.setOrigin(SHIP_SIZE.x / 2, SHIP_SIZE.y / 2);
 
+	marker.setPointCount(3);
+	//marker.setRadius(SHIP_MARKER_RADIUS);
+	marker.setPoint(0, sf::Vector2f(0.0, 0.0));
+	marker.setPoint(1, sf::Vector2f(SHIP_MARKER_SIZE.x / 2, SHIP_MARKER_SIZE.y));
+	marker.setPoint(2, sf::Vector2f(-SHIP_MARKER_SIZE.x / 2, SHIP_MARKER_SIZE.y));
+	marker.setOrigin(0.0, SHIP_MARKER_SIZE.y / 2);
+	marker.setFillColor(sf::Color::Magenta);
+
 	thrusterFireTexture.loadFromFile("Images/Thruster Fire.png");
 	thrusterFireSprite.setTexture(thrusterFireTexture);
 	thrusterFireSprite.setOrigin(thrusterFireTexture.getSize().x / 2, 0);
@@ -68,6 +80,7 @@ Spaceship::Spaceship(int ShipNumber) : heatBar(HEATBAR_MAX_SIZE, SHIP_MAX_HEAT, 
 	isFiringLaser = false;
 
 	isThrusting = false;
+	drawMarker = false;
 
 	heatDissipationMultiplier = 0;
 
@@ -273,6 +286,9 @@ void Spaceship::handleInputs()
 		}
 	}
 
+	//---draw / don't draw marker---
+	drawMarker = sf::Joystick::isButtonPressed(shipNumber, 7);
+
 	//---reset button---
 	if (sf::Joystick::isButtonPressed(shipNumber, 9))
 	{
@@ -332,6 +348,10 @@ void Spaceship::draw(sf::RenderWindow& window)
 
 void Spaceship::drawUI(sf::RenderWindow& window)
 {
+	if (drawMarker)
+	{
+		window.draw(marker);
+	}
 	heatBar.draw(window);
 	laserBar.draw(window);
 }
@@ -357,6 +377,8 @@ bool Spaceship::handleCollision(Laser l)
 
 	float bX = l.position.x - position.x;
 	float bY = l.position.y - position.y;
+
+	//TODO: fix ship being behind laser but should still take damage
 
 	if (aX * bX + aY * bY > 0) //if the dot product is negative (for some reason it's positive instead)
 	{
@@ -385,6 +407,12 @@ void Spaceship::damage(float amount)
 {
 	heat += amount;
 	heatBar.setValue(heat);
+}
+
+void Spaceship::setMarkerPosition(sf::Vector2f pos)
+{
+	marker.setPosition(pos.x, pos.y + SHIP_MARKER_OFFSET);
+	marker.setRotation(rotation);
 }
 
 void Spaceship::changeState(State newState)

@@ -18,6 +18,8 @@ public:
 	sf::Texture thrusterFireTexture;
 	sf::Sprite thrusterFireSprite;
 
+	sf::ConvexShape marker; //marks where the ship is on the screen
+
 	sf::Vector2f position;
 	sf::Vector2f velocity;
 	float rotation; //in degrees
@@ -32,7 +34,9 @@ public:
 	bool isFiringLaser;
 	Healthbar laserBar;
 
+	//these variables are only for checking to see if you should draw certain objects
 	bool isThrusting;
+	bool drawMarker;
 
 	float heatDissipationMultiplier;
 
@@ -56,6 +60,8 @@ public:
 	bool handleCollision(Bullet b);
 	bool handleCollision(Laser l);
 	void damage(float amount);
+
+	void setMarkerPosition(sf::Vector2f pos);
 
 	void changeState(State newState);
 };

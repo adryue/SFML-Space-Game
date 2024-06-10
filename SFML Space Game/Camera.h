@@ -13,5 +13,7 @@ public:
 	Camera(int initialCoordSize);
 
 	void updateView();
+
+	sf::Vector2f getRelativePosition(int index); //gives the position of a ship relative to the screen
 };
 

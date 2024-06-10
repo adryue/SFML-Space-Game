@@ -31,8 +31,8 @@ ScreenName playScreen(sf::RenderWindow& window)
 	Background bg1(1, 0.5, 0.5);
 	Background bg2(2, 0.2, 0.5);
 	backgrounds.push_back(bg0); 
-	//backgrounds.push_back(bg1); 
-	//backgrounds.push_back(bg2);
+	backgrounds.push_back(bg1); 
+	backgrounds.push_back(bg2);
 	//backgrounds.push_back(Background(1, 0.0));
 	//backgrounds.push_back(Background(2, 1.0));
 
@@ -59,10 +59,6 @@ ScreenName playScreen(sf::RenderWindow& window)
 		//---ship inputs---
 		ship0.handleInputs();
 		ship1.handleInputs();
-
-		//---update ship positions---
-		ship0.update();
-		ship1.update();
 
 		//---update bullets---
 		for (int i = 0; i < bullets.size(); i++)
@@ -92,6 +88,14 @@ ScreenName playScreen(sf::RenderWindow& window)
 			ship0.handleCollision(lasers[i]);
 			ship1.handleCollision(lasers[i]);
 		}
+
+		//---update ship positions---
+		ship0.update();
+		ship1.update();
+
+		//---update ship markers
+		ship0.setMarkerPosition(camera.getRelativePosition(0));
+		ship1.setMarkerPosition(camera.getRelativePosition(1));
 
 		//---draw everything---
 		//update the camera view
