@@ -19,6 +19,7 @@ public:
 	sf::Sprite thrusterFireSprite;
 
 	sf::ConvexShape marker; //marks where the ship is on the screen
+	sf::CircleShape markerCircle;
 
 	sf::Vector2f position;
 	sf::Vector2f velocity;

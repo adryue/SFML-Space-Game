@@ -10,6 +10,7 @@ const float SHIP_EXPANDED_MAX_RADIUS = (SHIP_EXPANDED_MAX_SIZE.x + SHIP_EXPANDED
 
 const sf::Vector2f SHIP_MARKER_SIZE(10.0, 20.0);
 const float SHIP_MARKER_OFFSET = 40.0; //offset from the ship's position
+const float SHIP_MARKER_CIRCLE_RADIUS = 40.0;
 
 const float SHIP_ROTATION_SPEED = 3.5;
 const float SHIP_MOVEMENT_SPEED = 0.1;
@@ -63,8 +64,14 @@ Spaceship::Spaceship(int ShipNumber) : heatBar(HEATBAR_MAX_SIZE, SHIP_MAX_HEAT, 
 	marker.setPoint(0, sf::Vector2f(0.0, 0.0));
 	marker.setPoint(1, sf::Vector2f(SHIP_MARKER_SIZE.x / 2, SHIP_MARKER_SIZE.y));
 	marker.setPoint(2, sf::Vector2f(-SHIP_MARKER_SIZE.x / 2, SHIP_MARKER_SIZE.y));
-	marker.setOrigin(0.0, SHIP_MARKER_SIZE.y / 2);
+	marker.setOrigin(0.0, SHIP_MARKER_SIZE.y + SHIP_MARKER_CIRCLE_RADIUS);
 	marker.setFillColor(sf::Color::Magenta);
+
+	markerCircle.setRadius(SHIP_MARKER_CIRCLE_RADIUS);
+	markerCircle.setOrigin(SHIP_MARKER_CIRCLE_RADIUS, SHIP_MARKER_CIRCLE_RADIUS);
+	markerCircle.setFillColor(sf::Color::Transparent);
+	markerCircle.setOutlineThickness(3.0);
+	markerCircle.setOutlineColor(sf::Color::Magenta);
 
 	thrusterFireTexture.loadFromFile("Images/Thruster Fire.png");
 	thrusterFireSprite.setTexture(thrusterFireTexture);
@@ -351,6 +358,7 @@ void Spaceship::drawUI(sf::RenderWindow& window)
 	if (drawMarker)
 	{
 		window.draw(marker);
+		window.draw(markerCircle);
 	}
 	heatBar.draw(window);
 	laserBar.draw(window);
@@ -411,8 +419,11 @@ void Spaceship::damage(float amount)
 
 void Spaceship::setMarkerPosition(sf::Vector2f pos)
 {
-	marker.setPosition(pos.x, pos.y + SHIP_MARKER_OFFSET);
+	//marker.setPosition(pos.x, pos.y + SHIP_MARKER_OFFSET);
+	marker.setPosition(pos);
 	marker.setRotation(rotation);
+
+	markerCircle.setPosition(pos);
 }
 
 void Spaceship::resetUIPositions()

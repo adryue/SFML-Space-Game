@@ -106,15 +106,16 @@ ScreenName playScreen(sf::RenderWindow& window)
 		ship0.update();
 		ship1.update();
 
-		//---update ship markers
+		//---update the camera view---
+		camera.coordinates[0] = ship0.position;
+		camera.coordinates[1] = ship1.position;
+		camera.updateView();
+
+		//---update ship markers---
 		ship0.setMarkerPosition(camera.getRelativePosition(0));
 		ship1.setMarkerPosition(camera.getRelativePosition(1));
 
 		//---draw everything---
-		//update the camera view
-		camera.coordinates[0] = ship0.position;
-		camera.coordinates[1] = ship1.position;
-		camera.updateView();
 		window.setView(camera.view);
 		//draw backgrounds
 		//window.draw(background);
