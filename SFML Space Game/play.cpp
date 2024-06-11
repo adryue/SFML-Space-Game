@@ -48,10 +48,23 @@ ScreenName playScreen(sf::RenderWindow& window)
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
-			if (event.type == sf::Event::Closed)
+			switch (event.type)
 			{
+			case sf::Event::Closed:
 				window.close();
 				return ScreenName::none;
+				break;
+
+			case sf::Event::Resized:
+				WIN_X_LEN = event.size.width;
+				WIN_Y_LEN = event.size.height;
+				camera.resetSize();
+				ship0.resetUIPositions();
+				ship1.resetUIPositions();
+				break;
+
+			default:
+				break;
 			}
 		}
 		window.clear();
@@ -124,7 +137,8 @@ ScreenName playScreen(sf::RenderWindow& window)
 			l.draw(window);
 		}
 		//draw ui
-		window.setView(window.getDefaultView());
+		window.setView(sf::View(sf::FloatRect(0.0, 0.0, WIN_X_LEN, WIN_Y_LEN)));
+		//std::cout << window.getDefaultView().getSize().x << ", " << window.getDefaultView().getSize().y << std::endl;
 		ship0.drawUI(window);
 		ship1.drawUI(window);
 

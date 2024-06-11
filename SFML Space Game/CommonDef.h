@@ -10,8 +10,8 @@ enum ScreenName
 
 //defined in main.cpp
 extern const int FRAMERATE;
-extern const int WIN_X_LEN;
-extern const int WIN_Y_LEN;
+extern int WIN_X_LEN;
+extern int WIN_Y_LEN;
 
 //defined in spaceship.cpp
 extern const sf::Vector2f SHIP_SIZE;

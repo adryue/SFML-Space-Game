@@ -62,6 +62,7 @@ public:
 	void damage(float amount);
 
 	void setMarkerPosition(sf::Vector2f pos);
+	void resetUIPositions();
 
 	void changeState(State newState);
 };

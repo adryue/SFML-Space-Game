@@ -12,9 +12,14 @@ int temp = 10;
 
 Camera::Camera(int initialCoordSize)
 {
-	view.reset(sf::FloatRect(0.f, 0.f, WIN_X_LEN, WIN_Y_LEN));
+	resetSize();
 
 	coordinates.resize(initialCoordSize);
+}
+
+void Camera::resetSize()
+{
+	view.reset(sf::FloatRect(0.f, 0.f, WIN_X_LEN, WIN_Y_LEN));
 }
 
 void Camera::updateView()

@@ -415,6 +415,12 @@ void Spaceship::setMarkerPosition(sf::Vector2f pos)
 	marker.setRotation(rotation);
 }
 
+void Spaceship::resetUIPositions()
+{
+	heatBar.resetPosition();
+	laserBar.resetPosition();
+}
+
 void Spaceship::changeState(State newState)
 {
 	state = newState;

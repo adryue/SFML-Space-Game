@@ -3,8 +3,8 @@
 #include "play.h"
 
 const int FRAMERATE = 60;
-const int WIN_X_LEN = 1280;
-const int WIN_Y_LEN = 720;
+int WIN_X_LEN = 1280;
+int WIN_Y_LEN = 720;
 
 int main()
 {

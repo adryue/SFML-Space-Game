@@ -15,10 +15,15 @@ public:
 	float value;
 	float maxValue;
 
-	Healthbar(sf::Vector2f maxSz, float maxVal, int orientation, int barNum, float posOffset);
+	int orientation;
+	int barNumber;
+	float positionOffset;
+
+	Healthbar(sf::Vector2f maxSz, float maxVal, int orient, int barNum, float posOffset);
 	//barNum is for when there are multiple bars, so that we know how far to offset (based on outline thickness)
 	//posOffset is used when there are multiple bars, so you have to offset the position of each one (based on bar sizes)
 
+	void resetPosition(); //this should be called when the window gets resized
 	void setValue(float val);
 	void setMinMaxColors(sf::Color minClr, sf::Color maxClr);
 	void draw(sf::RenderWindow& window);
