@@ -4,6 +4,7 @@
 
 std::vector<Bullet> bullets;
 std::vector<Laser> lasers;
+std::vector<Asteroid> asteroids;
 
 void addBullet(Bullet bullet) //used inside the spaceship class
 {
@@ -13,6 +14,11 @@ void addBullet(Bullet bullet) //used inside the spaceship class
 void addLaser(Laser laser) //used inside the spaceship class
 {
 	lasers.push_back(laser);
+}
+
+void addAsteroid(Asteroid asteroid) //used inside the Asteroid Spawner class
+{
+	asteroids.push_back(asteroid);
 }
 
 ScreenName playScreen(sf::RenderWindow& window)
@@ -31,8 +37,8 @@ ScreenName playScreen(sf::RenderWindow& window)
 	Background bg1(1, 0.5, 0.5);
 	Background bg2(2, 0.2, 0.5);
 	backgrounds.push_back(bg0); 
-	backgrounds.push_back(bg1); 
-	backgrounds.push_back(bg2);
+	//backgrounds.push_back(bg1); 
+	//backgrounds.push_back(bg2);
 	//backgrounds.push_back(Background(1, 0.0));
 	//backgrounds.push_back(Background(2, 1.0));
 
@@ -42,6 +48,7 @@ ScreenName playScreen(sf::RenderWindow& window)
 	Camera camera(2); //2 for the number of spaceships
 
 	//TODO: add asteroids
+	AsteroidSpawner asteroidSpawner;
 	
 	while (window.isOpen())
 	{
@@ -73,6 +80,10 @@ ScreenName playScreen(sf::RenderWindow& window)
 		ship0.handleInputs();
 		ship1.handleInputs();
 
+		//---update ship positions---
+		ship0.update();
+		ship1.update();
+
 		//---update bullets---
 		for (int i = 0; i < bullets.size(); i++)
 		{
@@ -102,14 +113,24 @@ ScreenName playScreen(sf::RenderWindow& window)
 			ship1.handleCollision(lasers[i]);
 		}
 
-		//---update ship positions---
-		ship0.update();
-		ship1.update();
-
 		//---update the camera view---
 		camera.coordinates[0] = ship0.position;
 		camera.coordinates[1] = ship1.position;
 		camera.updateView();
+
+		//---update asteroid spawner and asteroids---
+		asteroidSpawner.updateCamLocation(camera.view);
+		asteroidSpawner.updateSpawn();
+		for (int i = 0; i < asteroids.size(); i++)
+		{
+			if (asteroids[i].update(camera.view))
+			{
+				asteroids.erase(asteroids.begin() + i);
+				i--;
+
+				std::cout << "despawning asteroid" << std::endl;
+			}
+		}
 
 		//---update ship markers---
 		ship0.setMarkerPosition(camera.getRelativePosition(0));
@@ -117,16 +138,22 @@ ScreenName playScreen(sf::RenderWindow& window)
 
 		//---draw everything---
 		window.setView(camera.view);
+		//window.setView(sf::View(sf::FloatRect(-WIN_X_LEN * 2, -WIN_Y_LEN * 2, WIN_X_LEN * 4, WIN_Y_LEN * 4)));
 		//draw backgrounds
 		//window.draw(background);
 		for (Background& b : backgrounds)
 		{
-			b.update(camera.view.getCenter());
+			b.update(camera.view.getCenter(), camera.view.getSize());
 			b.draw(window);
 		}
 		//draw ships
 		ship0.draw(window);
 		ship1.draw(window);
+		//draw asteroids
+		for (Asteroid& a : asteroids)
+		{
+			a.draw(window);
+		}
 		//draw bullets
 		for (Bullet& b : bullets)
 		{
@@ -137,6 +164,7 @@ ScreenName playScreen(sf::RenderWindow& window)
 		{
 			l.draw(window);
 		}
+		window.draw(camera.viewOutline);
 		//draw ui
 		window.setView(sf::View(sf::FloatRect(0.0, 0.0, WIN_X_LEN, WIN_Y_LEN)));
 		//std::cout << window.getDefaultView().getSize().x << ", " << window.getDefaultView().getSize().y << std::endl;

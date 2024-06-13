@@ -15,6 +15,10 @@ Camera::Camera(int initialCoordSize)
 	resetSize();
 
 	coordinates.resize(initialCoordSize);
+
+	viewOutline.setFillColor(sf::Color::Transparent);
+	viewOutline.setOutlineThickness(10.0);
+	viewOutline.setOutlineColor(sf::Color::White);
 }
 
 void Camera::resetSize()
@@ -64,7 +68,6 @@ void Camera::updateView()
 		}
 
 		//---zooming in---
-
 		float dist = sqrt(xDist * xDist + yDist * yDist);
 		float distMin = sqrt(((view.getSize().x / 2) * CAMERA_OBJECT_MIN_DISTANCE) * ((view.getSize().x / 2) * CAMERA_OBJECT_MIN_DISTANCE) +
 							 ((view.getSize().y / 2) * CAMERA_OBJECT_MIN_DISTANCE) * ((view.getSize().y / 2) * CAMERA_OBJECT_MIN_DISTANCE));
@@ -99,13 +102,15 @@ void Camera::updateView()
 			std::cout << "zoom in y" << std::endl;
 		}*/
 
-		//---keeping the camera at a minimum size
-		if (view.getSize().x < CAMERA_MIN_SIZE.x)
-		{
-			view.zoom(CAMERA_MIN_SIZE.x / view.getSize().x);
-		}
+	}
+	//---keeping the camera at a minimum size
+	if (view.getSize().x < CAMERA_MIN_SIZE.x)
+	{
+		view.zoom(CAMERA_MIN_SIZE.x / view.getSize().x);
 	}
 
+	viewOutline.setPosition(view.getCenter().x - view.getSize().x / 2, view.getCenter().y - view.getSize().y / 2);
+	viewOutline.setSize(sf::Vector2f(view.getSize().x, view.getSize().y));
 }
 
 sf::Vector2f Camera::getRelativePosition(int index)

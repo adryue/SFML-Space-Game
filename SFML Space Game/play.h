@@ -6,8 +6,11 @@
 #include "spaceship.h"
 #include "Bullet.h"
 #include "Laser.h"
+#include "Asteroid.h"
+#include "AsteroidSpawner.h"
 
 void addBullet(Bullet bullet);
 void addLaser(Laser laser);
+void addAsteroid(Asteroid asteroid);
 
 ScreenName playScreen(sf::RenderWindow& window);

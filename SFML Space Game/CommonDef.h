@@ -32,3 +32,6 @@ extern const float LASER_MAX_DAMAGE;
 //defined in Healthbar.cpp
 extern const sf::Vector2f HEATBAR_MAX_SIZE;
 extern const sf::Vector2f LASERBAR_MAX_SIZE;
+
+//defined in Camera.cpp
+extern const sf::Vector2f CAMERA_MIN_SIZE;
