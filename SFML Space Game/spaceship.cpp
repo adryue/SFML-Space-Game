@@ -8,6 +8,8 @@ const float SHIP_RADIUS = (SHIP_SIZE.x + SHIP_SIZE.y) / 4; //used for calculatin
 const sf::Vector2f SHIP_EXPANDED_MAX_SIZE(160, 160);
 const float SHIP_EXPANDED_MAX_RADIUS = (SHIP_EXPANDED_MAX_SIZE.x + SHIP_EXPANDED_MAX_SIZE.y) / 4;
 
+const float SHIP_MASS = 10.0;
+
 const sf::Vector2f SHIP_MARKER_SIZE(10.0, 20.0);
 const float SHIP_MARKER_OFFSET = 40.0; //offset from the ship's position
 const float SHIP_MARKER_CIRCLE_RADIUS = 40.0;
@@ -48,6 +50,7 @@ Spaceship::Spaceship(int ShipNumber) : heatBar(HEATBAR_MAX_SIZE, SHIP_MAX_HEAT, 
 
 	collisionBox.setRadius(SHIP_RADIUS);
 	collisionBox.setOrigin(SHIP_RADIUS, SHIP_RADIUS);
+	//collisionBox.setFillColor(sf::Color::Green);
 	collisionBox.setFillColor(sf::Color(100, 100, 100, 100));
 	collisionBox.setOutlineThickness(3.0);
 	collisionBox.setOutlineColor(sf::Color::White);
@@ -158,8 +161,10 @@ void Spaceship::handleInputs()
 		velocity.x -= SHIP_MINI_MOVEMENT_SPEED * joyStickR;
 		velocity.y -= SHIP_MINI_MOVEMENT_SPEED * joyStickZ;
 
-		//position.x -= SHIP_MOVEMENT_SPEED * joyStickR * 100;
-		//position.y -= SHIP_MOVEMENT_SPEED * joyStickZ * 100;
+		//position.x -= SHIP_MOVEMENT_SPEED * joyStickR * 40;
+		//position.y -= SHIP_MOVEMENT_SPEED * joyStickZ * 40;
+		//velocity.x = 0;
+		//velocity.y = 0;
 	}
 
 	/*float joyStickZ = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::Z);
@@ -409,6 +414,71 @@ bool Spaceship::handleCollision(Laser l)
 	}
 
 	return false;
+}
+
+void Spaceship::handleCollision(Asteroid &a)
+{
+	sf::Vector2f normal(position.x - a.position.x, position.y - a.position.y);
+	float distance = sqrt((normal.x) * (normal.x) + (normal.y) * (normal.y));
+	if (distance <= collisionBox.getRadius() + a.radius)
+	{
+		//std::cout << "normal: (" << normal.x << ", " << normal.y << ")" << std::endl;
+
+		//translate the ship so that it stops overlapping with the asteroid
+		position += (normal / distance) * (collisionBox.getRadius() + a.radius - distance);
+
+		float velocityMag = sqrt((velocity.x) * (velocity.x) + (velocity.y) * (velocity.y)); //magnitude of velocity
+		float astVelocityMag = sqrt((a.velocity.x) * (a.velocity.x) + (a.velocity.y) * (a.velocity.y)); //magnitude of asteroid velocity
+
+		//get the tangent line
+		sf::Vector2f tangent(normal.y, -normal.x);
+		float tangentMag = sqrt((tangent.x) * (tangent.x) + (tangent.y) * (tangent.y)); //magnitude of tangent line
+		float thetaT = atan(tangent.x / -tangent.y);
+		if (tangent.y > 0)
+		{
+			thetaT += M_PI;
+		}
+
+		//get "horizontal" and "vertical" components projected along the tangent line
+		float dotProduct = velocity.x * tangent.x + velocity.y * tangent.y;
+		float theta = acos(dotProduct / (tangentMag * velocityMag));
+		float verticalV = velocityMag * sin(theta);
+		float horizontalV = dotProduct / tangentMag;
+		if (velocity.x == 0 && velocity.y == 0)
+		{
+			verticalV = 0;
+			horizontalV = 0;
+		}
+
+		//do the same thing with the asteroid
+		float astDotProduct = a.velocity.x * tangent.x + a.velocity.y * tangent.y;
+		float astTheta = acos(astDotProduct / (tangentMag * astVelocityMag));
+		float astVerticalV = -(astVelocityMag * sin(astTheta));
+		float astHorizontalV = astDotProduct / tangentMag;
+		if (a.velocity.x == 0 && a.velocity.y == 0)
+		{
+			astVerticalV = 0;
+			astHorizontalV = 0;
+		}
+
+		//calculate the new "vertical" velocities using conservation of momentum and kinetic energy
+		float newVerticalV = (verticalV * (SHIP_MASS - a.mass) + 2 * a.mass * astVerticalV) / (SHIP_MASS + a.mass);
+		float newAstVerticalV = verticalV - astVerticalV + newVerticalV;
+
+		//convert "horizontal" and "vertical" velocities back to x and y coordinates
+		velocity.x = horizontalV * sin(thetaT) - newVerticalV * cos(thetaT);
+		velocity.y = -horizontalV * cos(thetaT) - newVerticalV * sin(thetaT);
+
+		if (isnan(velocity.x) || isnan(velocity.y))
+		{
+			std::cout << "Something's wrong" << std::endl;
+		}
+		//std::cout << velocity.x << ", " << velocity.y << std::endl;
+
+		//same with asteroids
+		a.velocity.x = astHorizontalV * sin(thetaT) - newAstVerticalV * cos(thetaT);
+		a.velocity.y = -astHorizontalV * cos(thetaT) - newAstVerticalV * sin(thetaT);
+	}
 }
 
 void Spaceship::damage(float amount)

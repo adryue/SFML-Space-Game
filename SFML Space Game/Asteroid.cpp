@@ -1,7 +1,11 @@
 #include "Asteroid.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include <iostream>
 
 const int ASTEROID_DESPAWN_TIME = 600; //number of frames asteroid is out of view before despawning
+
+const float ASTEROID_MASS_MULTIPLIER = 0.00005;
 
 Asteroid::Asteroid(float radi, sf::Vector2f pos, sf::Vector2f vel)
 {
@@ -10,6 +14,8 @@ Asteroid::Asteroid(float radi, sf::Vector2f pos, sf::Vector2f vel)
 	collisionBox.setOrigin(radi, radi);
 	collisionBox.setPosition(pos);
 
+	mass = (4.f / 3.f) * M_PI * radi * radi * radi * ASTEROID_MASS_MULTIPLIER;
+	//mass = 10;
 	radius = radi;
 	position = pos;
 	velocity = vel;

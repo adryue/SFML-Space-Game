@@ -40,7 +40,6 @@ void AsteroidSpawner::updateSpawn()
 		sf::Vector2f pos2;
 
 		int side = rand() % 4;
-		std::cout << "side: " << side << std::endl;
 		switch (side)
 		{
 		case 0: //spawn on top side
@@ -93,6 +92,5 @@ void AsteroidSpawner::updateSpawn()
 		velocity *= ((float)rand() / RAND_MAX) * (ASTEROID_MAX_SPEED - ASTEROID_MIN_SPEED) + ASTEROID_MIN_SPEED;
 
 		addAsteroid(Asteroid(radius, position, velocity));
-		std::cout << "Asteroid: " << radius << ", (" << position.x << ", " << position.y << ") --- (" << velocity.x << ", " << velocity.y << ")" << std::endl;
 	}
 }

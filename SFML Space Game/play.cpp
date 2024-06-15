@@ -24,7 +24,7 @@ void addAsteroid(Asteroid asteroid) //used inside the Asteroid Spawner class
 ScreenName playScreen(sf::RenderWindow& window)
 {
 	/*sf::Texture backgroundTexture;
-	backgroundTexture.loadFromFile("Images/background.png");
+	backgroundTexture.loadFromFile("Images/Background 0.png");
 	backgroundTexture.setRepeated(true);
 	sf::Sprite background;
 	background.setTexture(backgroundTexture);
@@ -37,8 +37,8 @@ ScreenName playScreen(sf::RenderWindow& window)
 	Background bg1(1, 0.5, 0.5);
 	Background bg2(2, 0.2, 0.5);
 	backgrounds.push_back(bg0); 
-	//backgrounds.push_back(bg1); 
-	//backgrounds.push_back(bg2);
+	backgrounds.push_back(bg1); 
+	backgrounds.push_back(bg2);
 	//backgrounds.push_back(Background(1, 0.0));
 	//backgrounds.push_back(Background(2, 1.0));
 
@@ -49,6 +49,25 @@ ScreenName playScreen(sf::RenderWindow& window)
 
 	//TODO: add asteroids
 	AsteroidSpawner asteroidSpawner;
+	//addAsteroid(Asteroid(40.0, sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2 + 200), sf::Vector2f(0, -1)));
+	//ship0.velocity.x = 1.0;
+	//ship0.velocity.y = 0.0;
+	//ship0.position = sf::Vector2f(WIN_X_LEN / 2 - 200, WIN_Y_LEN / 2);
+	
+	//addAsteroid(Asteroid(20.0, sf::Vector2f(WIN_X_LEN / 2 + 100, WIN_Y_LEN / 2), sf::Vector2f(-1, 0)));
+	//ship0.velocity.x = 1.0;
+	//ship0.velocity.y = 0.0;
+	//ship0.position = sf::Vector2f(WIN_X_LEN / 2 - 200, WIN_Y_LEN / 2);
+
+	//addAsteroid(Asteroid(20.0, sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2 - 100), sf::Vector2f(0, 1)));
+	//ship0.velocity.x = 0.0;
+	//ship0.velocity.y = -1.0;
+	//ship0.position = sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2 + 200);
+	
+	//addAsteroid(Asteroid(20.0, sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2 - 200), sf::Vector2f(0, 1)));
+	//ship0.velocity.x = 0.0;
+	//ship0.velocity.y = 0.0;
+	//ship0.position = sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2 + 100);
 	
 	while (window.isOpen())
 	{
@@ -127,9 +146,10 @@ ScreenName playScreen(sf::RenderWindow& window)
 			{
 				asteroids.erase(asteroids.begin() + i);
 				i--;
-
-				std::cout << "despawning asteroid" << std::endl;
+				continue;
 			}
+			ship0.handleCollision(asteroids[i]);
+			ship1.handleCollision(asteroids[i]);
 		}
 
 		//---update ship markers---
@@ -138,7 +158,7 @@ ScreenName playScreen(sf::RenderWindow& window)
 
 		//---draw everything---
 		window.setView(camera.view);
-		//window.setView(sf::View(sf::FloatRect(-WIN_X_LEN * 2, -WIN_Y_LEN * 2, WIN_X_LEN * 4, WIN_Y_LEN * 4)));
+		//window.setView(sf::View(sf::FloatRect(0, 0, WIN_X_LEN * 2, WIN_Y_LEN * 2)));
 		//draw backgrounds
 		//window.draw(background);
 		for (Background& b : backgrounds)

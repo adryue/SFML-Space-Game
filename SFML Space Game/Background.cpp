@@ -16,6 +16,7 @@ Background::Background(int backgroundNum, float intens, float opacity)
 
 void Background::update(sf::Vector2f camPosition, sf::Vector2f camSize)
 {
+	//TODO: fix background 3d zoom
 	sprite.setPosition(camPosition.x * intensity,
 					   camPosition.y * intensity);
 

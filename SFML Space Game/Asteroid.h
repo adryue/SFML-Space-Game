@@ -5,6 +5,7 @@ class Asteroid
 public:
 	sf::CircleShape collisionBox;
 
+	float mass;
 	float radius;
 	sf::Vector2f position;
 	sf::Vector2f velocity;

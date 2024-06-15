@@ -5,6 +5,7 @@
 #include "Bullet.h"
 #include "Laser.h"
 #include "Healthbar.h"
+#include "Asteroid.h"
 
 class Spaceship
 {
@@ -60,6 +61,7 @@ public:
 
 	bool handleCollision(Bullet b);
 	bool handleCollision(Laser l);
+	void handleCollision(Asteroid &a);
 	void damage(float amount);
 
 	void setMarkerPosition(sf::Vector2f pos);
