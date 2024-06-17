@@ -68,7 +68,14 @@ ScreenName playScreen(sf::RenderWindow& window)
 	//ship0.velocity.x = 0.0;
 	//ship0.velocity.y = 0.0;
 	//ship0.position = sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2 + 100);
-	
+
+	//addAsteroid(Asteroid(20.0, sf::Vector2f(WIN_X_LEN / 2 - 100, WIN_Y_LEN / 2 - 200), sf::Vector2f(1, 1)));
+	//addAsteroid(Asteroid(30.0, sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2 + 100), sf::Vector2f(0, -1)));
+	//addAsteroid(Asteroid(30.0, sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2), sf::Vector2f(0, 0)));
+
+	//ship0.velocity = sf::Vector2f(1000, 0);
+	//ship1.velocity = sf::Vector2f(999, 0);
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -100,6 +107,7 @@ ScreenName playScreen(sf::RenderWindow& window)
 		ship1.handleInputs();
 
 		//---update ship positions---
+		ship0.handleCollision(ship1);
 		ship0.update();
 		ship1.update();
 
@@ -112,10 +120,22 @@ ScreenName playScreen(sf::RenderWindow& window)
 				i--;
 				continue;
 			}
+			//collisions with ships
 			if (ship0.handleCollision(bullets[i]) || ship1.handleCollision(bullets[i]))
 			{
 				bullets.erase(bullets.begin() + i);
 				i--;
+				continue;
+			}
+			//collisions with asteroids
+			for (Asteroid& a : asteroids)
+			{
+				if (a.handleCollision(bullets[i]))
+				{
+					bullets.erase(bullets.begin() + i);
+					i--;
+					break;
+				}
 			}
 		}
 
@@ -148,8 +168,15 @@ ScreenName playScreen(sf::RenderWindow& window)
 				i--;
 				continue;
 			}
+			//handle collisions between ships and asteroids
 			ship0.handleCollision(asteroids[i]);
 			ship1.handleCollision(asteroids[i]);
+
+			//handle collisions between asteroids
+			for (int j = i + 1; j < asteroids.size(); j++)
+			{
+				asteroids[i].handleCollision(asteroids[j]);
+			}
 		}
 
 		//---update ship markers---

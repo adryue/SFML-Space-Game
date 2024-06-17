@@ -3,7 +3,7 @@
 #include <random>
 
 const float ASTEROID_MIN_RADIUS = 50.0;
-const float ASTEROID_MAX_RADIUS = 100.0;
+const float ASTEROID_MAX_RADIUS = 150.0;
 
 const float ASTEROID_MIN_SPAWN_CHANCE = 0.001; //chance every frame to spawn an asteroid
 const float ASTEROID_MAX_SPAWN_CHANCE = 1.0 / (float)FRAMERATE;

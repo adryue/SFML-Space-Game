@@ -143,6 +143,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="play.cpp" />
     <ClCompile Include="spaceship.cpp" />
+    <ClCompile Include="Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asteroid.h" />
@@ -155,6 +156,7 @@
     <ClInclude Include="Laser.h" />
     <ClInclude Include="play.h" />
     <ClInclude Include="spaceship.h" />
+    <ClInclude Include="Utilities.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\Background 0.png" />

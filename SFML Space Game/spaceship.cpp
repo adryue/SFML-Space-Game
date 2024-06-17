@@ -22,6 +22,9 @@ const float SHIP_MAX_HEAT = 300;
 const float SHIP_HEAT_DISSIPATION = 0.5;
 const float SHIP_HEAT_EXPANDED_MAX_DISSIPATION = 1.0;
 
+const float SHIP_COLLISION_HEAT_MULTIPLIER = 3.0;
+const float SHIP_COLLISION_SLOWDOWN_MULTIPLIER = 0.9; //collisions aren't perfectly elastic, as some energy becomes heat
+
 //const int SHIP_BULLET_FIRING_COOLDOWN = 20;
 const float SHIP_BULLET_FIRING_KNOCKBACK = 0.01; //multiplier value based on bullet's speed
 
@@ -155,7 +158,7 @@ void Spaceship::handleInputs()
 	joyStickR = std::max(joyStickR, -JOYSTICK_R_MAX_VALUE);
 	joyStickR /= JOYSTICK_R_MAX_VALUE;
 
-	float joyStickZR = sqrt(joyStickZ * joyStickZ + joyStickR * joyStickR);
+	float joyStickZR = magnitude(sf::Vector2f(joyStickZ, joyStickR));
 	if (joyStickZR > JOYSTICK_THRESHOLD)
 	{
 		velocity.x -= SHIP_MINI_MOVEMENT_SPEED * joyStickR;
@@ -374,7 +377,7 @@ bool Spaceship::handleCollision(Bullet b)
 	float posX = b.position.x - position.x;
 	float posY = b.position.y - position.y;
 	float minDistance = b.collisionBox.getRadius() + collisionBox.getRadius();
-	if (posX * posX + posY * posY <= minDistance * minDistance)
+	if (posX * posX + posY * posY < minDistance * minDistance)
 	{
 		damage(BULLET_DAMAGE);
 		return true;
@@ -405,7 +408,7 @@ bool Spaceship::handleCollision(Laser l)
 	//distance from the circle to the laser line
 	float distX = x - position.x;
 	float distY = y - position.y;
-	float dist = std::sqrt(distX * distX + distY * distY);
+	float dist = magnitude(sf::Vector2f(distX, distY));
 
 	if (dist < l.size.x / 2 + collisionBox.getRadius())
 	{
@@ -419,31 +422,35 @@ bool Spaceship::handleCollision(Laser l)
 void Spaceship::handleCollision(Asteroid &a)
 {
 	sf::Vector2f normal(position.x - a.position.x, position.y - a.position.y);
-	float distance = sqrt((normal.x) * (normal.x) + (normal.y) * (normal.y));
-	if (distance <= collisionBox.getRadius() + a.radius)
+	float distance = magnitude(normal);
+	if (distance < collisionBox.getRadius() + a.radius)
 	{
 		//std::cout << "normal: (" << normal.x << ", " << normal.y << ")" << std::endl;
 
 		//translate the ship so that it stops overlapping with the asteroid
 		position += (normal / distance) * (collisionBox.getRadius() + a.radius - distance);
 
-		float velocityMag = sqrt((velocity.x) * (velocity.x) + (velocity.y) * (velocity.y)); //magnitude of velocity
-		float astVelocityMag = sqrt((a.velocity.x) * (a.velocity.x) + (a.velocity.y) * (a.velocity.y)); //magnitude of asteroid velocity
+		float velocityMag = magnitude(velocity); //magnitude of velocity
+		float astVelocityMag = magnitude(a.velocity); //magnitude of asteroid velocity
 
 		//get the tangent line
 		sf::Vector2f tangent(normal.y, -normal.x);
-		float tangentMag = sqrt((tangent.x) * (tangent.x) + (tangent.y) * (tangent.y)); //magnitude of tangent line
-		float thetaT = atan(tangent.x / -tangent.y);
+		float tangentMag = magnitude(tangent); //magnitude of tangent line
+		/*float thetaT = atan(tangent.x / -tangent.y);
 		if (tangent.y > 0)
 		{
 			thetaT += M_PI;
-		}
+		}*/
+		float thetaT = getAngle(tangent);
 
 		//get "horizontal" and "vertical" components projected along the tangent line
-		float dotProduct = velocity.x * tangent.x + velocity.y * tangent.y;
+		/*float dotProduct = velocity.x * tangent.x + velocity.y * tangent.y;
 		float theta = acos(dotProduct / (tangentMag * velocityMag));
 		float verticalV = velocityMag * sin(theta);
-		float horizontalV = dotProduct / tangentMag;
+		float horizontalV = dotProduct / tangentMag;*/
+		float theta = thetaT - getAngle(velocity);
+		float verticalV = velocityMag * sin(theta);
+		float horizontalV = velocityMag * cos(theta);
 		if (velocity.x == 0 && velocity.y == 0)
 		{
 			verticalV = 0;
@@ -451,10 +458,13 @@ void Spaceship::handleCollision(Asteroid &a)
 		}
 
 		//do the same thing with the asteroid
-		float astDotProduct = a.velocity.x * tangent.x + a.velocity.y * tangent.y;
+		/*float astDotProduct = a.velocity.x * tangent.x + a.velocity.y * tangent.y;
 		float astTheta = acos(astDotProduct / (tangentMag * astVelocityMag));
 		float astVerticalV = -(astVelocityMag * sin(astTheta));
-		float astHorizontalV = astDotProduct / tangentMag;
+		float astHorizontalV = astDotProduct / tangentMag;*/
+		float astTheta = thetaT - getAngle(a.velocity);
+		float astVerticalV = astVelocityMag * sin(astTheta);
+		float astHorizontalV = astVelocityMag * cos(astTheta);
 		if (a.velocity.x == 0 && a.velocity.y == 0)
 		{
 			astVerticalV = 0;
@@ -465,6 +475,11 @@ void Spaceship::handleCollision(Asteroid &a)
 		float newVerticalV = (verticalV * (SHIP_MASS - a.mass) + 2 * a.mass * astVerticalV) / (SHIP_MASS + a.mass);
 		float newAstVerticalV = verticalV - astVerticalV + newVerticalV;
 
+		//collisions aren't perfectly elastic, some energy becomes heat
+		damage(abs(verticalV - newVerticalV) * SHIP_COLLISION_HEAT_MULTIPLIER);
+		newVerticalV *= SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
+		newAstVerticalV *= SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
+
 		//convert "horizontal" and "vertical" velocities back to x and y coordinates
 		velocity.x = horizontalV * sin(thetaT) - newVerticalV * cos(thetaT);
 		velocity.y = -horizontalV * cos(thetaT) - newVerticalV * sin(thetaT);
@@ -473,11 +488,87 @@ void Spaceship::handleCollision(Asteroid &a)
 		{
 			std::cout << "Something's wrong" << std::endl;
 		}
-		//std::cout << velocity.x << ", " << velocity.y << std::endl;
 
 		//same with asteroids
 		a.velocity.x = astHorizontalV * sin(thetaT) - newAstVerticalV * cos(thetaT);
 		a.velocity.y = -astHorizontalV * cos(thetaT) - newAstVerticalV * sin(thetaT);
+	}
+}
+
+void Spaceship::handleCollision(Spaceship& s) //this is almost exactly the same code as Spaceship::handleCollision(Asteroid &a)
+{
+	sf::Vector2f normal(position.x - s.position.x, position.y - s.position.y);
+	float distance = magnitude(normal);
+	if (distance < collisionBox.getRadius() + s.collisionBox.getRadius())
+	{
+		//std::cout << "normal: (" << normal.x << ", " << normal.y << ")" << std::endl;
+
+		//translate the ship so that it stops overlapping with the other ship
+		position += (normal / distance) * (collisionBox.getRadius() + s.collisionBox.getRadius() - distance);
+
+		float velocityMag = magnitude(velocity); //magnitude of velocity
+		float sVelocityMag = magnitude(s.velocity); //magnitude of other ship velocity
+
+		//get the tangent line
+		sf::Vector2f tangent(normal.y, -normal.x);
+		float tangentMag = magnitude(tangent); //magnitude of tangent line
+		/*float thetaT = atan(tangent.x / -tangent.y);
+		if (tangent.y > 0)
+		{
+			thetaT += M_PI;
+		}*/
+		float thetaT = getAngle(tangent);
+
+		//get "horizontal" and "vertical" components projected along the tangent line
+		/*float dotProduct = velocity.x * tangent.x + velocity.y * tangent.y;
+		float theta = acos(dotProduct / (tangentMag * velocityMag));
+		float verticalV = velocityMag * sin(theta);
+		float horizontalV = dotProduct / tangentMag;*/
+		float theta = thetaT - getAngle(velocity);
+		float verticalV = velocityMag * sin(theta);
+		float horizontalV = velocityMag * cos(theta);
+		if (velocity.x == 0 && velocity.y == 0)
+		{
+			verticalV = 0;
+			horizontalV = 0;
+		}
+
+		//do the same thing with the other ship
+		/*float sDotProduct = s.velocity.x * tangent.x + s.velocity.y * tangent.y;
+		float sTheta = acos(sDotProduct / (tangentMag * sVelocityMag));
+		float sVerticalV = -(sVelocityMag * sin(sTheta));
+		float sHorizontalV = sDotProduct / tangentMag;*/
+		float sTheta = thetaT - getAngle(s.velocity);
+		float sVerticalV = sVelocityMag * sin(sTheta);
+		float sHorizontalV = sVelocityMag * cos(sTheta);
+		if (s.velocity.x == 0 && s.velocity.y == 0)
+		{
+			sVerticalV = 0;
+			sHorizontalV = 0;
+		}
+
+		//calculate the new "vertical" velocities using conservation of momentum and kinetic energy
+		float newVerticalV = sVerticalV;
+		float newAstVerticalV = verticalV;
+
+		//collisions aren't perfectly elastic, some energy becomes heat
+		damage(abs(verticalV - newVerticalV) * SHIP_COLLISION_HEAT_MULTIPLIER);
+		s.damage(abs(verticalV - newVerticalV) * SHIP_COLLISION_HEAT_MULTIPLIER);
+		newVerticalV *= SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
+		newAstVerticalV *= SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
+
+		//convert "horizontal" and "vertical" velocities back to x and y coordinates
+		velocity.x = horizontalV * sin(thetaT) - newVerticalV * cos(thetaT);
+		velocity.y = -horizontalV * cos(thetaT) - newVerticalV * sin(thetaT);
+
+		if (isnan(velocity.x) || isnan(velocity.y))
+		{
+			std::cout << "Something's wrong" << std::endl;
+		}
+
+		//same with asteroids
+		s.velocity.x = sHorizontalV * sin(thetaT) - newAstVerticalV * cos(thetaT);
+		s.velocity.y = -sHorizontalV * cos(thetaT) - newAstVerticalV * sin(thetaT);
 	}
 }
 

@@ -3,7 +3,7 @@
 const float BULLET_RADIUS = 4.0;
 const sf::Vector2f BULLET_SIZE(BULLET_RADIUS, BULLET_RADIUS * 5);
 //const float BULLET_SPEED = 15.0;
-const float BULLET_SPEED = 8.0;
+const float BULLET_SPEED = 11.0;
 const float BULLET_DAMAGE = 50.0;
 
 const int BULLET_LIFESPAN = 180; //number of frames until bullet despawns

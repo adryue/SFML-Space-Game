@@ -62,6 +62,7 @@ public:
 	bool handleCollision(Bullet b);
 	bool handleCollision(Laser l);
 	void handleCollision(Asteroid &a);
+	void handleCollision(Spaceship& s);
 	void damage(float amount);
 
 	void setMarkerPosition(sf::Vector2f pos);
