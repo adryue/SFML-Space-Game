@@ -8,9 +8,10 @@ const sf::Vector2f LASER_MAX_SIZE(20.0, 10000.0); //the y value is an arbitrary 
 const float LASER_MAX_DAMAGE = 8.0;
 const float LASER_FADE_SPEED = 0.2; //size that laser shrinks by per frame
 
-Laser::Laser(sf::Vector2f pos, float rot, float pwr)
+Laser::Laser(sf::Vector2f pos, float rot, float pwr, sf::Vector2f vel)
 {
 	position = pos;
+	velocity = vel;
 	damage = LASER_MAX_DAMAGE * pwr;
 
 	size.x = LASER_MAX_SIZE.x * pwr;
@@ -32,6 +33,8 @@ bool Laser::update()
 	{
 		return true;
 	}
+
+	position += velocity;
 
 	hitbox.setSize(size);
 	hitbox.setOrigin(size.x / 2, size.y);

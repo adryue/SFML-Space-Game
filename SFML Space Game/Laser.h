@@ -9,11 +9,12 @@ public:
 
 	sf::Vector2f size;
 	sf::Vector2f position;
+	sf::Vector2f velocity;
 	float damage;
 
 	float slope;
 
-	Laser(sf::Vector2f pos, float rot, float pwr);
+	Laser(sf::Vector2f pos, float rot, float pwr, sf::Vector2f vel);
 
 	bool update();
 

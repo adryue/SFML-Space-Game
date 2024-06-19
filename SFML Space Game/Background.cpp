@@ -3,7 +3,7 @@
 
 Background::Background(int backgroundNum, float intens, float opacity)
 {
-	texture.loadFromFile("Images/Background " + std::to_string(backgroundNum) + ".png");
+	texture.loadFromFile("Assets/Images/Background " + std::to_string(backgroundNum) + ".png");
 	texture.setRepeated(true);
 	sprite.setTexture(texture);
 	sprite.setColor(sf::Color(255, 255, 255, 255.0 * opacity));

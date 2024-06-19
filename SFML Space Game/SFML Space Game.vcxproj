@@ -137,12 +137,15 @@
     <ClCompile Include="AsteroidSpawner.cpp" />
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="Button.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Healthbar.cpp" />
+    <ClCompile Include="home.cpp" />
     <ClCompile Include="Laser.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="play.cpp" />
     <ClCompile Include="spaceship.cpp" />
+    <ClCompile Include="Text.cpp" />
     <ClCompile Include="Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -150,12 +153,15 @@
     <ClInclude Include="AsteroidSpawner.h" />
     <ClInclude Include="Background.h" />
     <ClInclude Include="Bullet.h" />
+    <ClInclude Include="Button.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommonDef.h" />
     <ClInclude Include="Healthbar.h" />
+    <ClInclude Include="home.h" />
     <ClInclude Include="Laser.h" />
     <ClInclude Include="play.h" />
     <ClInclude Include="spaceship.h" />
+    <ClInclude Include="Text.h" />
     <ClInclude Include="Utilities.h" />
   </ItemGroup>
   <ItemGroup>

@@ -61,7 +61,7 @@ Spaceship::Spaceship(int ShipNumber) : heatBar(HEATBAR_MAX_SIZE, SHIP_MAX_HEAT, 
 	//hitbox.setPosition(WIN_X_LEN / 2, WIN_Y_LEN / 2);
 	position = sf::Vector2f(WIN_X_LEN / 2.0, WIN_Y_LEN / 2.0);
 
-	texture.loadFromFile("Images/Blue Ship.png");
+	texture.loadFromFile("Assets/Images/Blue Ship.png");
 	sprite.setTexture(texture);
 	sprite.setOrigin(SHIP_SIZE.x / 2, SHIP_SIZE.y / 2);
 
@@ -79,7 +79,7 @@ Spaceship::Spaceship(int ShipNumber) : heatBar(HEATBAR_MAX_SIZE, SHIP_MAX_HEAT, 
 	markerCircle.setOutlineThickness(3.0);
 	markerCircle.setOutlineColor(sf::Color::Magenta);
 
-	thrusterFireTexture.loadFromFile("Images/Thruster Fire.png");
+	thrusterFireTexture.loadFromFile("Assets/Images/Thruster Fire.png");
 	thrusterFireSprite.setTexture(thrusterFireTexture);
 	thrusterFireSprite.setOrigin(thrusterFireTexture.getSize().x / 2, 0);
 
@@ -287,7 +287,8 @@ void Spaceship::handleInputs()
 				Laser laser(sf::Vector2f(position.x + sin(rot) * collisionBox.getRadius(),
 							position.y - cos(rot) * collisionBox.getRadius()),
 							rotation,
-							damage);
+							damage,
+							velocity);
 
 				addLaser(laser);
 

@@ -13,6 +13,7 @@ enum ScreenName
 extern const int FRAMERATE;
 extern int WIN_X_LEN;
 extern int WIN_Y_LEN;
+extern sf::Font FONT;
 
 //defined in spaceship.cpp
 extern const sf::Vector2f SHIP_SIZE;

@@ -24,7 +24,7 @@ void addAsteroid(Asteroid asteroid) //used inside the Asteroid Spawner class
 ScreenName playScreen(sf::RenderWindow& window)
 {
 	/*sf::Texture backgroundTexture;
-	backgroundTexture.loadFromFile("Images/Background 0.png");
+	backgroundTexture.loadFromFile("Assets/Images/Background 0.png");
 	backgroundTexture.setRepeated(true);
 	sf::Sprite background;
 	background.setTexture(backgroundTexture);
@@ -33,7 +33,7 @@ ScreenName playScreen(sf::RenderWindow& window)
 	std::vector<Background> backgrounds;
 	//note: you have to create the background variable before putting it into the vector
 	//because you need to keep the instance of the texture
-	Background bg0(0, 0.9, 1.0);
+	Background bg0(5, 0.9, 1.0);
 	Background bg1(1, 0.5, 0.5);
 	Background bg2(2, 0.2, 0.5);
 	backgrounds.push_back(bg0); 
@@ -49,6 +49,7 @@ ScreenName playScreen(sf::RenderWindow& window)
 
 	//TODO: add asteroids
 	AsteroidSpawner asteroidSpawner;
+
 	//addAsteroid(Asteroid(40.0, sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2 + 200), sf::Vector2f(0, -1)));
 	//ship0.velocity.x = 1.0;
 	//ship0.velocity.y = 0.0;
