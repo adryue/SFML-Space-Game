@@ -3,12 +3,15 @@
 
 const float BUTTON_PADDING = 30.f;
 
+const sf::Color BUTTON_DEFAULT_COLOR(30, 30, 30, 128);
+const sf::Color BUTTON_SELECTED_COLOR(120, 120, 120, 128);
+
 Button::Button(std::string txt, sf::Vector2f orient) : text(txt, orient)
 {
 	orientation = orient;
 
-	hitbox.setFillColor(sf::Color(30, 30, 30, 128));
-	hitbox.setOutlineColor(sf::Color::Cyan);
+	hitbox.setFillColor(BUTTON_DEFAULT_COLOR);
+	hitbox.setOutlineColor(sf::Color::White);
 	hitbox.setSize(sf::Vector2f(text.getLocalBounds().width + text.getLocalBounds().left + BUTTON_PADDING,
 								text.getLocalBounds().height + text.getLocalBounds().top + BUTTON_PADDING));
 	hitbox.setOrigin(hitbox.getSize().x / 2, hitbox.getSize().y / 2);
@@ -25,11 +28,13 @@ void Button::setSelected(bool selected)
 {
 	if (selected)
 	{
-		hitbox.setOutlineThickness(5.0);
+		hitbox.setOutlineThickness(2.0);
+		hitbox.setFillColor(BUTTON_SELECTED_COLOR);
 	}
 	else
 	{
 		hitbox.setOutlineThickness(0);
+		hitbox.setFillColor(BUTTON_DEFAULT_COLOR);
 	}
 }
 

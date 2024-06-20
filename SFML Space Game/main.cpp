@@ -2,11 +2,13 @@
 #include "CommonDef.h"
 #include "play.h"
 #include "home.h"
+#include "end.h"
 
 const int FRAMERATE = 60;
 int WIN_X_LEN = 1280;
 int WIN_Y_LEN = 720;
 sf::Font FONT;
+int winner = -1;
 
 int main()
 {
@@ -27,7 +29,11 @@ int main()
 			nextScreen = homeScreen(window);
 			break;
 		case ScreenName::play:
+			winner = -1;
 			nextScreen = playScreen(window);
+			break;
+		case ScreenName::end:
+			nextScreen = endScreen(window);
 			break;
 		case ScreenName::none:
 			break;

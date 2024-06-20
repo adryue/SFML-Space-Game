@@ -139,6 +139,7 @@
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="end.cpp" />
     <ClCompile Include="Healthbar.cpp" />
     <ClCompile Include="home.cpp" />
     <ClCompile Include="Laser.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommonDef.h" />
+    <ClInclude Include="end.h" />
     <ClInclude Include="Healthbar.h" />
     <ClInclude Include="home.h" />
     <ClInclude Include="Laser.h" />

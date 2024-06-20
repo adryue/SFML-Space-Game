@@ -23,6 +23,11 @@ void addAsteroid(Asteroid asteroid) //used inside the Asteroid Spawner class
 
 ScreenName playScreen(sf::RenderWindow& window)
 {
+	//clear all objects from previous rounds
+	bullets.clear();
+	lasers.clear();
+	asteroids.clear();
+
 	/*sf::Texture backgroundTexture;
 	backgroundTexture.loadFromFile("Assets/Images/Background 0.png");
 	backgroundTexture.setRepeated(true);
@@ -178,6 +183,18 @@ ScreenName playScreen(sf::RenderWindow& window)
 			{
 				asteroids[i].handleCollision(asteroids[j]);
 			}
+		}
+
+		//---exit if there is a winner (one of the ships overheated)---
+		if (ship0.heat > SHIP_MAX_HEAT)
+		{
+			winner = 1;
+			return ScreenName::end;
+		}
+		else if (ship1.heat > SHIP_MAX_HEAT)
+		{
+			winner = 0;
+			return ScreenName::end;
 		}
 
 		//---update ship markers---
