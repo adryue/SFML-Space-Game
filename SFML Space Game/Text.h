@@ -8,6 +8,8 @@ public:
 
 	Text(std::string txt, sf::Vector2f orient);
 
+	void setText(std::string txt);
+
 	void resetPosition();
 };
 

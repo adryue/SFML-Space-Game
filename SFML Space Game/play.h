@@ -8,6 +8,7 @@
 #include "Laser.h"
 #include "Asteroid.h"
 #include "AsteroidSpawner.h"
+#include "Text.h"
 
 void addBullet(Bullet bullet);
 void addLaser(Laser laser);

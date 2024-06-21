@@ -82,6 +82,80 @@ ScreenName playScreen(sf::RenderWindow& window)
 	//ship0.velocity = sf::Vector2f(1000, 0);
 	//ship1.velocity = sf::Vector2f(999, 0);
 
+	sf::Clock clock;
+
+	//---starting phase
+	int startingTime = 3; //seconds remaining in starting phase
+	Text startingText("Starting in 3", sf::Vector2f(0.5, 1.f / 3.f));
+	while (window.isOpen())
+	{
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			switch (event.type)
+			{
+			case sf::Event::Closed:
+				window.close();
+				return ScreenName::none;
+				break;
+
+			case sf::Event::Resized:
+				WIN_X_LEN = event.size.width;
+				WIN_Y_LEN = event.size.height;
+				camera.resetSize();
+				ship0.resetUIPositions();
+				ship1.resetUIPositions();
+				break;
+
+			default:
+				break;
+			}
+		}
+		window.clear();
+
+		if (clock.getElapsedTime().asSeconds() >= 1.0)
+		{
+			clock.restart();
+			startingTime--;
+			if (startingTime <= 0)
+			{
+				break;
+			}
+			startingText.setText("Starting in " + std::to_string(startingTime));
+		}
+
+		ship0.update();
+		ship1.update();
+
+		//---update the camera view---
+		camera.coordinates[0] = ship0.position;
+		camera.coordinates[1] = ship1.position;
+		camera.updateView();
+
+		//---draw everything---
+		window.setView(camera.view);
+		//draw backgrounds
+		//window.draw(background);
+		for (Background& b : backgrounds)
+		{
+			b.update(camera.view.getCenter(), camera.view.getSize());
+			b.draw(window);
+		}
+		//draw ships
+		ship0.draw(window);
+		ship1.draw(window);
+
+		window.draw(startingText);
+
+		//window.draw(camera.viewOutline);
+		//draw ui
+		window.setView(sf::View(sf::FloatRect(0.0, 0.0, WIN_X_LEN, WIN_Y_LEN)));
+		//std::cout << window.getDefaultView().getSize().x << ", " << window.getDefaultView().getSize().y << std::endl;
+		ship0.drawUI(window);
+		ship1.drawUI(window);
+		window.display();
+	}
+
 	while (window.isOpen())
 	{
 		sf::Event event;

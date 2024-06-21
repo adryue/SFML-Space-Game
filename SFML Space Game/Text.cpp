@@ -11,6 +11,14 @@ Text::Text(std::string txt, sf::Vector2f orient)
 	setPosition(WIN_X_LEN * orientation.x, WIN_Y_LEN * orientation.y);
 }
 
+void Text::setText(std::string txt)
+{
+	setString(txt);
+	setOrigin((getLocalBounds().width + getLocalBounds().left) / 2, getLocalBounds().height);
+	setPosition(WIN_X_LEN * orientation.x, WIN_Y_LEN * orientation.y);
+}
+
+
 void Text::resetPosition()
 {
 	setPosition(WIN_X_LEN * orientation.x, WIN_Y_LEN * orientation.y);
