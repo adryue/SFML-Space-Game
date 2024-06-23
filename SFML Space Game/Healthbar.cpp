@@ -55,11 +55,15 @@ void Healthbar::resetPosition()
 
 void Healthbar::setValue(float val)
 {
-	value = val;
+	value = std::min(val, maxValue);
 	bar.setSize(sf::Vector2f(value / maxValue * maxSize.x, maxSize.y));
-	bar.setFillColor(sf::Color(minColor.r + (minColor.r - maxColor.r) * (1 - value / maxValue),
+	/*bar.setFillColor(sf::Color(minColor.r + (minColor.r - maxColor.r) * (1 - value / maxValue),
 							   minColor.g + (minColor.g - maxColor.g) * (1 - value / maxValue),
-							   minColor.b + (minColor.b - maxColor.b) * (1 - value / maxValue)));
+							   minColor.b + (minColor.b - maxColor.b) * (1 - value / maxValue)));*/
+
+	bar.setFillColor(sf::Color(minColor.r + (maxColor.r - minColor.r) * (value / maxValue),
+							   minColor.g + (maxColor.g - minColor.g) * (value / maxValue),
+							   minColor.b + (maxColor.b - minColor.b) * (value / maxValue)));
 }
 
 void Healthbar::setMinMaxColors(sf::Color minClr, sf::Color maxClr)

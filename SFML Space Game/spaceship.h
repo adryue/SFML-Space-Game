@@ -56,6 +56,9 @@ public:
 
 	void handleInputs();
 	void update();
+	void updateLocation();
+	void updateHeat();
+
 	void draw(sf::RenderWindow& window);
 	void drawUI(sf::RenderWindow& window);
 

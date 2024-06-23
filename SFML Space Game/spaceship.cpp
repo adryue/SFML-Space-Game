@@ -316,6 +316,12 @@ void Spaceship::handleInputs()
 
 void Spaceship::update()
 {
+	updateLocation();
+	updateHeat();
+}
+
+void Spaceship::updateLocation()
+{
 	hitbox.setRotation(rotation);
 	sprite.setRotation(rotation);
 
@@ -329,7 +335,9 @@ void Spaceship::update()
 		thrusterFireSprite.setRotation(rotation);
 		thrusterFireSprite.setPosition(position);
 	}
-
+}
+void Spaceship::updateHeat()
+{
 	switch (state)
 	{
 	case State::normal:
