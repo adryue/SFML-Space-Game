@@ -14,4 +14,6 @@ void addBullet(Bullet bullet);
 void addLaser(Laser laser);
 void addAsteroid(Asteroid asteroid);
 
+void addCameraShake(float amount);
+
 ScreenName playScreen(sf::RenderWindow& window);

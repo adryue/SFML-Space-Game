@@ -17,20 +17,27 @@ const float SHIP_MARKER_CIRCLE_RADIUS = 40.0;
 const float SHIP_ROTATION_SPEED = 3.5;
 const float SHIP_MOVEMENT_SPEED = 0.1;
 const float SHIP_MINI_MOVEMENT_SPEED = 0.01;
+const float SHIP_MEGA_MOVEMENT_SPEED = 1.0f;
 
 const float SHIP_MAX_HEAT = 300;
 const float SHIP_HEAT_DISSIPATION = 0.5;
 const float SHIP_HEAT_EXPANDED_MAX_DISSIPATION = 1.0;
+const float SHIP_MEGA_BOOST_HEAT = 1.0f;
 
 const float SHIP_COLLISION_HEAT_MULTIPLIER = 3.0;
 const float SHIP_COLLISION_SLOWDOWN_MULTIPLIER = 0.9; //collisions aren't perfectly elastic, as some energy becomes heat
+const float SHIP_COLLISION_CAMERA_SHAKE = 0.7f;
 
 //const int SHIP_BULLET_FIRING_COOLDOWN = 20;
 const float SHIP_BULLET_FIRING_KNOCKBACK = 0.01; //multiplier value based on bullet's speed
+const float SHIP_BULLET_CAMERA_SHAKE = 2.5f;
+//const float SHIP_BULLET_CAMERA_SHAKE = 2.5f;
 
 const float SHIP_LASER_FIRING_KNOCKBACK = 1.3; //multiplier value based on laser damage
 const int SHIP_LASER_MAX_BUILDUP = 100; //number of frames required to build up to full strength
 const float SHIP_LASER_BUILDUP_MAX_HEAT = 1.0; //when charging up the laser, the ship gains heat
+const float SHIP_LASER_CAMERA_SHAKE = 0.08f;
+//const float SHIP_LASER_CAMERA_SHAKE = 0.8f;
 
 const float JOYSTICK_THRESHOLD = 0.15; //the minimum value required to move (after the joystick is normalized)
 const float JOYSTICK_X_MAX_VALUE = 70; //the maximum value from joystick x input
@@ -106,6 +113,9 @@ Spaceship::Spaceship(int ShipNumber) : heatBar(HEATBAR_MAX_SIZE, SHIP_MAX_HEAT, 
 	case 1:
 		position = sf::Vector2f(WIN_X_LEN / 3.0 * 2.0, WIN_Y_LEN / 2.0);
 		break;
+	default:
+		position = sf::Vector2f((float)WIN_X_LEN / 2.f, (float)WIN_Y_LEN / 2.f);
+		break;
 	}
 
 	state = State::normal;
@@ -136,8 +146,20 @@ void Spaceship::handleInputs()
 
 		//convert from degrees to radians
 		float rot = rotation * M_PI / 180;
-		velocity.x += sin(rot) * SHIP_MOVEMENT_SPEED * joyStickU;
-		velocity.y -= cos(rot) * SHIP_MOVEMENT_SPEED * joyStickU;
+
+		if (!sf::Joystick::isButtonPressed(shipNumber, 4))
+		{
+			velocity.x += sin(rot) * SHIP_MOVEMENT_SPEED * joyStickU;
+			velocity.y -= cos(rot) * SHIP_MOVEMENT_SPEED * joyStickU;
+		}
+		else //mega boost if the left trigger is held all the way down
+		{
+			velocity.x += sin(rot) * SHIP_MEGA_MOVEMENT_SPEED * joyStickU;
+			velocity.y -= cos(rot) * SHIP_MEGA_MOVEMENT_SPEED * joyStickU;
+
+			//mega boost builds up heat
+			damage(SHIP_MEGA_BOOST_HEAT);
+		}
 
 		//show more of the thruster fire sprite if the trigger is pressed more
 		thrusterFireSprite.setOrigin(thrusterFireTexture.getSize().x / 2,
@@ -288,7 +310,7 @@ void Spaceship::handleInputs()
 							position.y - cos(rot) * collisionBox.getRadius()),
 							rotation,
 							damage,
-							velocity);
+							sf::Vector2f(0.f, 0.f));
 
 				addLaser(laser);
 
@@ -389,6 +411,7 @@ bool Spaceship::handleCollision(Bullet b)
 	if (posX * posX + posY * posY < minDistance * minDistance)
 	{
 		damage(BULLET_DAMAGE);
+		addCameraShake(SHIP_BULLET_CAMERA_SHAKE);
 		return true;
 	}
 	return false;
@@ -422,6 +445,7 @@ bool Spaceship::handleCollision(Laser l)
 	if (dist < l.size.x / 2 + collisionBox.getRadius())
 	{
 		damage(l.damage);
+		addCameraShake(SHIP_LASER_CAMERA_SHAKE * l.damage);
 		return true;
 	}
 
@@ -486,6 +510,7 @@ void Spaceship::handleCollision(Asteroid &a)
 
 		//collisions aren't perfectly elastic, some energy becomes heat
 		damage(abs(verticalV - newVerticalV) * SHIP_COLLISION_HEAT_MULTIPLIER);
+		addCameraShake(abs(verticalV - newVerticalV) * SHIP_COLLISION_CAMERA_SHAKE);
 		newVerticalV *= SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
 		newAstVerticalV *= SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
 
@@ -563,6 +588,7 @@ void Spaceship::handleCollision(Spaceship& s) //this is almost exactly the same 
 		//collisions aren't perfectly elastic, some energy becomes heat
 		damage(abs(verticalV - newVerticalV) * SHIP_COLLISION_HEAT_MULTIPLIER);
 		s.damage(abs(verticalV - newVerticalV) * SHIP_COLLISION_HEAT_MULTIPLIER);
+		addCameraShake(abs(verticalV - newVerticalV) * SHIP_COLLISION_CAMERA_SHAKE);
 		newVerticalV *= SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
 		newAstVerticalV *= SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
 

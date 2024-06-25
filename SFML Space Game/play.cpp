@@ -6,6 +6,8 @@ std::vector<Bullet> bullets;
 std::vector<Laser> lasers;
 std::vector<Asteroid> asteroids;
 
+Camera camera(2);
+
 void addBullet(Bullet bullet) //used inside the spaceship class
 {
 	bullets.push_back(bullet);
@@ -19,6 +21,11 @@ void addLaser(Laser laser) //used inside the spaceship class
 void addAsteroid(Asteroid asteroid) //used inside the Asteroid Spawner class
 {
 	asteroids.push_back(asteroid);
+}
+
+void addCameraShake(float amount)
+{
+	camera.addShake(amount);
 }
 
 ScreenName playScreen(sf::RenderWindow& window)
@@ -49,8 +56,9 @@ ScreenName playScreen(sf::RenderWindow& window)
 
 	Spaceship ship0(0);
 	Spaceship ship1(1);
+	//Spaceship ship2(4);
 
-	Camera camera(2); //2 for the number of spaceships
+	camera = Camera(2); //2 for the number of spaceships
 
 	//TODO: add asteroids
 	AsteroidSpawner asteroidSpawner;
@@ -186,11 +194,13 @@ ScreenName playScreen(sf::RenderWindow& window)
 		//---ship inputs---
 		ship0.handleInputs();
 		ship1.handleInputs();
+		//ship2.handleInputs();
 
 		//---update ship positions---
 		ship0.handleCollision(ship1);
 		ship0.update();
 		ship1.update();
+		//ship2.update();
 
 		//---update bullets---
 		for (int i = 0; i < bullets.size(); i++)
@@ -202,7 +212,7 @@ ScreenName playScreen(sf::RenderWindow& window)
 				continue;
 			}
 			//collisions with ships
-			if (ship0.handleCollision(bullets[i]) || ship1.handleCollision(bullets[i]))
+			if (ship0.handleCollision(bullets[i]) || ship1.handleCollision(bullets[i])/* || ship2.handleCollision(bullets[i])*/)
 			{
 				bullets.erase(bullets.begin() + i);
 				i--;
@@ -231,11 +241,13 @@ ScreenName playScreen(sf::RenderWindow& window)
 			}
 			ship0.handleCollision(lasers[i]);
 			ship1.handleCollision(lasers[i]);
+			//ship2.handleCollision(lasers[2]);
 		}
 
 		//---update the camera view---
 		camera.coordinates[0] = ship0.position;
 		camera.coordinates[1] = ship1.position;
+		//camera.coordinates[2] = ship2.position;
 		camera.updateView();
 
 		//---update asteroid spawner and asteroids---
@@ -252,6 +264,7 @@ ScreenName playScreen(sf::RenderWindow& window)
 			//handle collisions between ships and asteroids
 			ship0.handleCollision(asteroids[i]);
 			ship1.handleCollision(asteroids[i]);
+			//ship2.handleCollision(asteroids[i]);
 
 			//handle collisions between asteroids
 			for (int j = i + 1; j < asteroids.size(); j++)
@@ -271,10 +284,16 @@ ScreenName playScreen(sf::RenderWindow& window)
 			winner = 0;
 			break;
 		}
+		/*else if (ship2.heat > SHIP_MAX_HEAT)
+		{
+			winner = 999;
+			break;
+		}*/
 
 		//---update ship markers---
 		ship0.setMarkerPosition(camera.getRelativePosition(0));
 		ship1.setMarkerPosition(camera.getRelativePosition(1));
+		//ship2.setMarkerPosition(camera.getRelativePosition(2));
 
 		//---draw everything---
 		window.setView(camera.view);
@@ -289,6 +308,7 @@ ScreenName playScreen(sf::RenderWindow& window)
 		//draw ships
 		ship0.draw(window);
 		ship1.draw(window);
+		//ship2.draw(window);
 		//draw asteroids
 		for (Asteroid& a : asteroids)
 		{

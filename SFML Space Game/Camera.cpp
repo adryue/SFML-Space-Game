@@ -1,5 +1,8 @@
 #include "Camera.h"
 #include <iostream>
+#include <random>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 const float CAMERA_OBJECT_MAX_DISTANCE_X = 0.8; //multiplier for how far an object can be from the center of the camera
 const float CAMERA_OBJECT_MAX_DISTANCE_Y = (1 - (1 - ((float)WIN_Y_LEN / WIN_X_LEN) * CAMERA_OBJECT_MAX_DISTANCE_X) / 2);
@@ -8,13 +11,19 @@ const float CAMERA_ZOOM_INTENSITY = 0.1;
 
 const sf::Vector2f CAMERA_MIN_SIZE(WIN_X_LEN / 2, WIN_Y_LEN / 2);
 
+const float CAMERA_SHAKE_DECREASE_MULTIPLIER = 0.93f; //amount that camera shake decreases by each time
+
 int temp = 10;
 
 Camera::Camera(int initialCoordSize)
 {
+	srand(time(NULL));
+
 	resetSize();
 
 	coordinates.resize(initialCoordSize);
+
+	shake = 0.f;
 
 	viewOutline.setFillColor(sf::Color::Transparent);
 	viewOutline.setOutlineThickness(10.0);
@@ -109,9 +118,25 @@ void Camera::updateView()
 		view.zoom(CAMERA_MIN_SIZE.x / view.getSize().x);
 	}
 
+	//offset the camera due to camera shake
+	float shakeAmount = shake * (float)rand() / RAND_MAX;
+	float shakeDirection = 2 * M_PI * (float)rand() / RAND_MAX;
+	center.x += sin(shakeDirection) * shakeAmount;
+	center.y -= cos(shakeDirection) * shakeAmount;
+	view.setCenter(center);
+	//shake -= 0.1f;
+	shake *= CAMERA_SHAKE_DECREASE_MULTIPLIER;
+	shake = std::max(shake, 0.f);
+
 	viewOutline.setPosition(view.getCenter().x - view.getSize().x / 2, view.getCenter().y - view.getSize().y / 2);
 	viewOutline.setSize(sf::Vector2f(view.getSize().x, view.getSize().y));
 }
+
+void Camera::addShake(float amount)
+{
+	shake += amount;
+}
+
 
 sf::Vector2f Camera::getRelativePosition(int index)
 {
