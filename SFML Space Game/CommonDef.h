@@ -18,12 +18,12 @@ extern sf::Font FONT;
 extern int winner;
 
 //defined in spaceship.cpp
-extern const sf::Vector2f SHIP_SIZE;
+//extern const sf::Vector2f SHIP_SIZE;
 
-extern const float SHIP_ROTATION_SPEED;
-extern const float SHIP_MOVEMENT_SPEED;
+//extern const float SHIP_ROTATION_SPEED;
+//extern const float SHIP_MOVEMENT_SPEED;
 
-extern const float SHIP_MAX_HEAT;
+//extern const float SHIP_MAX_HEAT;
 
 //defined in Bullet.cpp
 extern const float BULLET_RADIUS;

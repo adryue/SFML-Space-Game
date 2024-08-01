@@ -1,5 +1,12 @@
 #include <iostream>
 #include <vector>
+#include "Camera.h"
+#include "Background.h"
+#include "spaceship.h"
+#include "Ship0.h"
+#include "Ship1.h"
+#include "AsteroidSpawner.h"
+#include "Text.h"
 #include "play.h"
 
 std::vector<Bullet> bullets;
@@ -54,41 +61,14 @@ ScreenName playScreen(sf::RenderWindow& window)
 	//backgrounds.push_back(Background(1, 0.0));
 	//backgrounds.push_back(Background(2, 1.0));
 
-	Spaceship ship0(0);
-	Spaceship ship1(1);
+	//Spaceship ship0(0);
+	Ship0 ship0(0);
+	Ship1 ship1(1);
 	//Spaceship ship2(4);
 
 	camera = Camera(2); //2 for the number of spaceships
 
-	//TODO: add asteroids
 	AsteroidSpawner asteroidSpawner;
-
-	//addAsteroid(Asteroid(40.0, sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2 + 200), sf::Vector2f(0, -1)));
-	//ship0.velocity.x = 1.0;
-	//ship0.velocity.y = 0.0;
-	//ship0.position = sf::Vector2f(WIN_X_LEN / 2 - 200, WIN_Y_LEN / 2);
-	
-	//addAsteroid(Asteroid(20.0, sf::Vector2f(WIN_X_LEN / 2 + 100, WIN_Y_LEN / 2), sf::Vector2f(-1, 0)));
-	//ship0.velocity.x = 1.0;
-	//ship0.velocity.y = 0.0;
-	//ship0.position = sf::Vector2f(WIN_X_LEN / 2 - 200, WIN_Y_LEN / 2);
-
-	//addAsteroid(Asteroid(20.0, sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2 - 100), sf::Vector2f(0, 1)));
-	//ship0.velocity.x = 0.0;
-	//ship0.velocity.y = -1.0;
-	//ship0.position = sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2 + 200);
-	
-	//addAsteroid(Asteroid(20.0, sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2 - 200), sf::Vector2f(0, 1)));
-	//ship0.velocity.x = 0.0;
-	//ship0.velocity.y = 0.0;
-	//ship0.position = sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2 + 100);
-
-	//addAsteroid(Asteroid(20.0, sf::Vector2f(WIN_X_LEN / 2 - 100, WIN_Y_LEN / 2 - 200), sf::Vector2f(1, 1)));
-	//addAsteroid(Asteroid(30.0, sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2 + 100), sf::Vector2f(0, -1)));
-	//addAsteroid(Asteroid(30.0, sf::Vector2f(WIN_X_LEN / 2, WIN_Y_LEN / 2), sf::Vector2f(0, 0)));
-
-	//ship0.velocity = sf::Vector2f(1000, 0);
-	//ship1.velocity = sf::Vector2f(999, 0);
 
 	sf::Clock clock;
 
@@ -113,6 +93,7 @@ ScreenName playScreen(sf::RenderWindow& window)
 				camera.resetSize();
 				ship0.resetUIPositions();
 				ship1.resetUIPositions();
+				startingText.resetPosition();
 				break;
 
 			default:
@@ -153,12 +134,12 @@ ScreenName playScreen(sf::RenderWindow& window)
 		ship0.draw(window);
 		ship1.draw(window);
 
-		window.draw(startingText);
 
 		//window.draw(camera.viewOutline);
 		//draw ui
 		window.setView(sf::View(sf::FloatRect(0.0, 0.0, WIN_X_LEN, WIN_Y_LEN)));
 		//std::cout << window.getDefaultView().getSize().x << ", " << window.getDefaultView().getSize().y << std::endl;
+		window.draw(startingText);
 		ship0.drawUI(window);
 		ship1.drawUI(window);
 		window.display();
@@ -274,12 +255,12 @@ ScreenName playScreen(sf::RenderWindow& window)
 		}
 
 		//---exit if there is a winner (one of the ships overheated)---
-		if (ship0.heat > SHIP_MAX_HEAT)
+		if (ship0.isOverheat())
 		{
 			winner = 1;
 			break;
 		}
-		else if (ship1.heat > SHIP_MAX_HEAT)
+		else if (ship1.isOverheat())
 		{
 			winner = 0;
 			break;
@@ -355,6 +336,7 @@ ScreenName playScreen(sf::RenderWindow& window)
 				camera.resetSize();
 				ship0.resetUIPositions();
 				ship1.resetUIPositions();
+				endingText.resetPosition();
 				break;
 
 			default:

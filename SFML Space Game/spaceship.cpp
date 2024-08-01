@@ -3,42 +3,6 @@
 #include <iostream>
 #include "spaceship.h"
 
-const sf::Vector2f SHIP_SIZE(40, 40);
-const float SHIP_RADIUS = (SHIP_SIZE.x + SHIP_SIZE.y) / 4; //used for calculating collisions
-const sf::Vector2f SHIP_EXPANDED_MAX_SIZE(160, 160);
-const float SHIP_EXPANDED_MAX_RADIUS = (SHIP_EXPANDED_MAX_SIZE.x + SHIP_EXPANDED_MAX_SIZE.y) / 4;
-
-const float SHIP_MASS = 10.0;
-
-const sf::Vector2f SHIP_MARKER_SIZE(10.0, 20.0);
-const float SHIP_MARKER_OFFSET = 40.0; //offset from the ship's position
-const float SHIP_MARKER_CIRCLE_RADIUS = 40.0;
-
-const float SHIP_ROTATION_SPEED = 3.5;
-const float SHIP_MOVEMENT_SPEED = 0.1;
-const float SHIP_MINI_MOVEMENT_SPEED = 0.01;
-const float SHIP_MEGA_MOVEMENT_SPEED = 1.0f;
-
-const float SHIP_MAX_HEAT = 300;
-const float SHIP_HEAT_DISSIPATION = 0.5;
-const float SHIP_HEAT_EXPANDED_MAX_DISSIPATION = 1.0;
-const float SHIP_MEGA_BOOST_HEAT = 1.0f;
-
-const float SHIP_COLLISION_HEAT_MULTIPLIER = 3.0;
-const float SHIP_COLLISION_SLOWDOWN_MULTIPLIER = 0.9; //collisions aren't perfectly elastic, as some energy becomes heat
-const float SHIP_COLLISION_CAMERA_SHAKE = 0.7f;
-
-//const int SHIP_BULLET_FIRING_COOLDOWN = 20;
-const float SHIP_BULLET_FIRING_KNOCKBACK = 0.01; //multiplier value based on bullet's speed
-const float SHIP_BULLET_CAMERA_SHAKE = 2.5f;
-//const float SHIP_BULLET_CAMERA_SHAKE = 2.5f;
-
-const float SHIP_LASER_FIRING_KNOCKBACK = 1.3; //multiplier value based on laser damage
-const int SHIP_LASER_MAX_BUILDUP = 100; //number of frames required to build up to full strength
-const float SHIP_LASER_BUILDUP_MAX_HEAT = 1.0; //when charging up the laser, the ship gains heat
-const float SHIP_LASER_CAMERA_SHAKE = 0.08f;
-//const float SHIP_LASER_CAMERA_SHAKE = 0.8f;
-
 const float JOYSTICK_THRESHOLD = 0.15; //the minimum value required to move (after the joystick is normalized)
 const float JOYSTICK_X_MAX_VALUE = 70; //the maximum value from joystick x input
 const float JOYSTICK_Z_MAX_VALUE = 60; //the maximum value from joystick Z input
@@ -46,20 +10,60 @@ const float JOYSTICK_R_MAX_VALUE = 60; //the maximum value from joystick R input
 const float JOYSTICK_U_MAX_VALUE = 75;
 const float JOYSTICK_V_MAX_VALUE = 75;
 
+//TODO: add spaceship classes
 
-Spaceship::Spaceship(int ShipNumber) : heatBar(HEATBAR_MAX_SIZE, SHIP_MAX_HEAT, ShipNumber, 0, 0.f),
-									   laserBar(LASERBAR_MAX_SIZE, SHIP_LASER_MAX_BUILDUP, ShipNumber, 1, HEATBAR_MAX_SIZE.y)
+ShipConstants::ShipConstants()
+{
+	SHIP_SIZE = sf::Vector2f(40, 40);
+	SHIP_RADIUS = (SHIP_SIZE.x + SHIP_SIZE.y) / 4; //used for calculating collisions
+	SHIP_EXPANDED_MAX_SIZE = sf::Vector2f(160, 160);
+	SHIP_EXPANDED_MAX_RADIUS = (SHIP_EXPANDED_MAX_SIZE.x + SHIP_EXPANDED_MAX_SIZE.y) / 4;
+
+	SHIP_MASS = 10.0;
+
+	SHIP_MARKER_SIZE = sf::Vector2f(10.0, 20.0);
+	SHIP_MARKER_OFFSET = 40.0; //offset from the ship's position
+	SHIP_MARKER_CIRCLE_RADIUS = 40.0;
+
+	SHIP_ROTATION_SPEED = 3.5;
+	SHIP_MOVEMENT_SPEED = 0.1;
+	SHIP_MINI_MOVEMENT_SPEED = 0.01;
+	SHIP_MEGA_MOVEMENT_SPEED = 0.3f;
+
+	SHIP_MAX_HEAT = 300;
+	SHIP_HEAT_DISSIPATION = 0.5;
+	SHIP_HEAT_EXPANDED_MAX_DISSIPATION = 1.0;
+	SHIP_MEGA_BOOST_HEAT = 1.1f;
+
+	SHIP_COLLISION_HEAT_MULTIPLIER = 3.0;
+	SHIP_COLLISION_SLOWDOWN_MULTIPLIER = 0.9; //collisions aren't perfectly elastic, as some energy becomes heat
+	SHIP_COLLISION_CAMERA_SHAKE = 0.7f;
+
+	SHIP_BULLET_FIRING_KNOCKBACK = 0.01; //multiplier value based on bullet's speed
+	SHIP_BULLET_CAMERA_SHAKE = 2.5f;
+
+	SHIP_LASER_FIRING_KNOCKBACK = 1.3; //multiplier value based on laser damage
+	SHIP_LASER_MAX_BUILDUP = 100; //number of frames required to build up to full strength
+	SHIP_LASER_BUILDUP_MAX_HEAT = 1.0; //when charging up the laser, the ship gains heat
+	SHIP_LASER_CAMERA_SHAKE = 0.08f;
+}
+
+Spaceship::Spaceship(int ShipNumber) : Spaceship(ShipNumber, ShipConstants()) {}
+
+Spaceship::Spaceship(int ShipNumber, ShipConstants constants) : CONSTANTS(constants),
+															heatBar(HEATBAR_MAX_SIZE, constants.SHIP_MAX_HEAT, ShipNumber, 0, 0.f),
+															laserBar(LASERBAR_MAX_SIZE, constants.SHIP_LASER_MAX_BUILDUP, ShipNumber, 1, HEATBAR_MAX_SIZE.y)
 {
 	heatBar.setMinMaxColors(sf::Color(255, 255, 0), sf::Color(255, 0, 0));
 	//heatBar.setMinMaxColors(sf::Color(255, 255, 255), sf::Color(255, 0, 0));
 	laserBar.setMinMaxColors(sf::Color::Cyan, sf::Color::Cyan);
 
-	hitbox.setSize(SHIP_SIZE);
-	hitbox.setOrigin(SHIP_SIZE.x / 2, SHIP_SIZE.y / 2);
+	hitbox.setSize(CONSTANTS.SHIP_SIZE);
+	hitbox.setOrigin(CONSTANTS.SHIP_SIZE.x / 2, CONSTANTS.SHIP_SIZE.y / 2);
 	hitbox.setFillColor(sf::Color::White);
 
-	collisionBox.setRadius(SHIP_RADIUS);
-	collisionBox.setOrigin(SHIP_RADIUS, SHIP_RADIUS);
+	collisionBox.setRadius(CONSTANTS.SHIP_RADIUS);
+	collisionBox.setOrigin(CONSTANTS.SHIP_RADIUS, CONSTANTS.SHIP_RADIUS);
 	//collisionBox.setFillColor(sf::Color::Green);
 	collisionBox.setFillColor(sf::Color(100, 100, 100, 100));
 	collisionBox.setOutlineThickness(3.0);
@@ -70,32 +74,29 @@ Spaceship::Spaceship(int ShipNumber) : heatBar(HEATBAR_MAX_SIZE, SHIP_MAX_HEAT, 
 
 	texture.loadFromFile("Assets/Images/Blue Ship.png");
 	sprite.setTexture(texture);
-	sprite.setOrigin(SHIP_SIZE.x / 2, SHIP_SIZE.y / 2);
-
-	marker.setPointCount(3);
-	//marker.setRadius(SHIP_MARKER_RADIUS);
-	marker.setPoint(0, sf::Vector2f(0.0, 0.0));
-	marker.setPoint(1, sf::Vector2f(SHIP_MARKER_SIZE.x / 2, SHIP_MARKER_SIZE.y));
-	marker.setPoint(2, sf::Vector2f(-SHIP_MARKER_SIZE.x / 2, SHIP_MARKER_SIZE.y));
-	marker.setOrigin(0.0, SHIP_MARKER_SIZE.y + SHIP_MARKER_CIRCLE_RADIUS);
-	marker.setFillColor(sf::Color::Magenta);
-
-	markerCircle.setRadius(SHIP_MARKER_CIRCLE_RADIUS);
-	markerCircle.setOrigin(SHIP_MARKER_CIRCLE_RADIUS, SHIP_MARKER_CIRCLE_RADIUS);
-	markerCircle.setFillColor(sf::Color::Transparent);
-	markerCircle.setOutlineThickness(3.0);
-	markerCircle.setOutlineColor(sf::Color::Magenta);
+	sprite.setOrigin(CONSTANTS.SHIP_SIZE.x / 2, CONSTANTS.SHIP_SIZE.y / 2);
 
 	thrusterFireTexture.loadFromFile("Assets/Images/Thruster Fire.png");
 	thrusterFireSprite.setTexture(thrusterFireTexture);
 	thrusterFireSprite.setOrigin(thrusterFireTexture.getSize().x / 2, 0);
 
+	marker.setPointCount(3);
+	marker.setPoint(0, sf::Vector2f(0.0, 0.0));
+	marker.setPoint(1, sf::Vector2f(CONSTANTS.SHIP_MARKER_SIZE.x / 2, CONSTANTS.SHIP_MARKER_SIZE.y));
+	marker.setPoint(2, sf::Vector2f(-CONSTANTS.SHIP_MARKER_SIZE.x / 2, CONSTANTS.SHIP_MARKER_SIZE.y));
+	marker.setOrigin(0.0, CONSTANTS.SHIP_MARKER_SIZE.y + CONSTANTS.SHIP_MARKER_CIRCLE_RADIUS);
+	marker.setFillColor(sf::Color::Magenta);
+
+	markerCircle.setRadius(CONSTANTS.SHIP_MARKER_CIRCLE_RADIUS);
+	markerCircle.setOrigin(CONSTANTS.SHIP_MARKER_CIRCLE_RADIUS, CONSTANTS.SHIP_MARKER_CIRCLE_RADIUS);
+	markerCircle.setFillColor(sf::Color::Transparent);
+	markerCircle.setOutlineThickness(3.0);
+	markerCircle.setOutlineColor(sf::Color::Magenta);
+
 	rotation = 0;
 
 	heat = 0;
 
-	firingCooldown = 0;
-	isFiringBullet = false;
 	laserBuildup = 0;
 	isFiringLaser = false;
 
@@ -123,17 +124,38 @@ Spaceship::Spaceship(int ShipNumber) : heatBar(HEATBAR_MAX_SIZE, SHIP_MAX_HEAT, 
 
 void Spaceship::handleInputs()
 {
-	//---rotating the ship---
+	handleRotations();
+	handleThrusting();
+	handleHeatShield();
+	handleFiring();
+
+	//draw / don't draw marker
+	drawMarker = sf::Joystick::isButtonPressed(shipNumber, 7);
+
+	//reset button
+	if (sf::Joystick::isButtonPressed(shipNumber, 9))
+	{
+		position = sf::Vector2f(WIN_X_LEN / 2.0, WIN_Y_LEN / 2.0);
+		velocity.x = 0;
+		velocity.y = 0;
+	}
+}
+
+void Spaceship::handleRotations()
+{
 	float joyStickX = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::X);
 	joyStickX = std::min(joyStickX, JOYSTICK_X_MAX_VALUE);
 	joyStickX = std::max(joyStickX, -JOYSTICK_X_MAX_VALUE);
 	joyStickX /= JOYSTICK_X_MAX_VALUE;
-
+	
 	if (abs(joyStickX) > JOYSTICK_THRESHOLD)
 	{
-		rotation += SHIP_ROTATION_SPEED * joyStickX;
+		rotation += CONSTANTS.SHIP_ROTATION_SPEED * joyStickX;
 	}
+}
 
+void Spaceship::handleThrusting()
+{
 	//---moving the ship forward---
 	float joyStickU = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::U);
 	joyStickU += JOYSTICK_U_MAX_VALUE;
@@ -149,21 +171,21 @@ void Spaceship::handleInputs()
 
 		if (!sf::Joystick::isButtonPressed(shipNumber, 4))
 		{
-			velocity.x += sin(rot) * SHIP_MOVEMENT_SPEED * joyStickU;
-			velocity.y -= cos(rot) * SHIP_MOVEMENT_SPEED * joyStickU;
+			velocity.x += sin(rot) * CONSTANTS.SHIP_MOVEMENT_SPEED * joyStickU;
+			velocity.y -= cos(rot) * CONSTANTS.SHIP_MOVEMENT_SPEED * joyStickU;
 		}
 		else //mega boost if the left trigger is held all the way down
 		{
-			velocity.x += sin(rot) * SHIP_MEGA_MOVEMENT_SPEED * joyStickU;
-			velocity.y -= cos(rot) * SHIP_MEGA_MOVEMENT_SPEED * joyStickU;
+			velocity.x += sin(rot) * CONSTANTS.SHIP_MEGA_MOVEMENT_SPEED * joyStickU;
+			velocity.y -= cos(rot) * CONSTANTS.SHIP_MEGA_MOVEMENT_SPEED * joyStickU;
 
 			//mega boost builds up heat
-			damage(SHIP_MEGA_BOOST_HEAT);
+			damage(CONSTANTS.SHIP_MEGA_BOOST_HEAT);
 		}
 
 		//show more of the thruster fire sprite if the trigger is pressed more
 		thrusterFireSprite.setOrigin(thrusterFireTexture.getSize().x / 2,
-									(-SHIP_RADIUS * 0.7 + thrusterFireTexture.getSize().y) - (thrusterFireTexture.getSize().y * joyStickU));
+									(-CONSTANTS.SHIP_RADIUS * 0.7 + thrusterFireTexture.getSize().y) - (thrusterFireTexture.getSize().y * joyStickU));
 	}
 	else
 	{
@@ -183,47 +205,17 @@ void Spaceship::handleInputs()
 	float joyStickZR = magnitude(sf::Vector2f(joyStickZ, joyStickR));
 	if (joyStickZR > JOYSTICK_THRESHOLD)
 	{
-		velocity.x -= SHIP_MINI_MOVEMENT_SPEED * joyStickR;
-		velocity.y -= SHIP_MINI_MOVEMENT_SPEED * joyStickZ;
+		velocity.x -= CONSTANTS.SHIP_MINI_MOVEMENT_SPEED * joyStickR;
+		velocity.y -= CONSTANTS.SHIP_MINI_MOVEMENT_SPEED * joyStickZ;
 
 		//position.x -= SHIP_MOVEMENT_SPEED * joyStickR * 40;
 		//position.y -= SHIP_MOVEMENT_SPEED * joyStickZ * 40;
 		//velocity.x = 0;
 		//velocity.y = 0;
 	}
-
-	/*float joyStickZ = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::Z);
-	joyStickZ = std::min(joyStickZ, JOYSTICK_Z_MAX_VALUE);
-	joyStickZ = std::max(joyStickZ, -JOYSTICK_Z_MAX_VALUE);
-	joyStickZ /= JOYSTICK_Z_MAX_VALUE;
-	float joyStickR = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::R);
-	joyStickR = std::min(joyStickR, JOYSTICK_R_MAX_VALUE);
-	joyStickR = std::max(joyStickR, -JOYSTICK_R_MAX_VALUE);
-	joyStickR /= JOYSTICK_R_MAX_VALUE;
-
-	float joyStickZR = sqrt(joyStickZ * joyStickZ + joyStickR * joyStickR);
-
-	if (joyStickZR > JOYSTICK_THRESHOLD)
-	{
-		Bullet b(position, velocity); //bullet has the same starting position and velocity as the ship
-
-		//get the new rotation for the bullet
-		float joyStickRotation = atan(-joyStickR / joyStickZ);
-		if (joyStickZ < 0)
-		{
-			joyStickRotation += M_PI;
-		}
-		float bulletRotation = (rotation * M_PI / 180) + joyStickRotation;
-
-		b.position.x += sin(bulletRotation) * collisionBox.getRadius();
-		b.position.y -= cos(bulletRotation) * collisionBox.getRadius();
-
-		b.velocity.x += sin(bulletRotation) * BULLET_SPEED;
-		b.velocity.y -= cos(bulletRotation) * BULLET_SPEED;
-		
-		addBullet(b);
-	}*/
-
+}
+void Spaceship::handleHeatShield()
+{
 	//---changing the state to normal / expanded---
 	float joyStickV = sf::Joystick::getAxisPosition(shipNumber, sf::Joystick::V);
 	joyStickV += JOYSTICK_V_MAX_VALUE;
@@ -232,109 +224,105 @@ void Spaceship::handleInputs()
 	joyStickV /= JOYSTICK_U_MAX_VALUE * 2;
 	if (joyStickV >= JOYSTICK_THRESHOLD)
 	{
-		hitbox.setSize(sf::Vector2f(SHIP_SIZE.x + SHIP_EXPANDED_MAX_SIZE.x * joyStickV,
-									SHIP_SIZE.y + SHIP_EXPANDED_MAX_SIZE.y * joyStickV));
+		hitbox.setSize(sf::Vector2f(CONSTANTS.SHIP_SIZE.x + CONSTANTS.SHIP_EXPANDED_MAX_SIZE.x * joyStickV,
+									CONSTANTS.SHIP_SIZE.y + CONSTANTS.SHIP_EXPANDED_MAX_SIZE.y * joyStickV));
 		hitbox.setOrigin(hitbox.getSize().x / 2, hitbox.getSize().y / 2);
 
-		collisionBox.setRadius(SHIP_RADIUS + SHIP_EXPANDED_MAX_RADIUS * joyStickV);
+		collisionBox.setRadius(CONSTANTS.SHIP_RADIUS + CONSTANTS.SHIP_EXPANDED_MAX_RADIUS * joyStickV);
 		collisionBox.setOrigin(collisionBox.getRadius(), collisionBox.getRadius());
 		
 		heatDissipationMultiplier = joyStickV;
 		state = State::expanded;
-
-		//reset values for firing lasers
-		laserBuildup = 0;
-		laserBar.setValue(0);
 	}
 	else
 	{
-		hitbox.setSize(SHIP_SIZE);
+		hitbox.setSize(CONSTANTS.SHIP_SIZE);
 		hitbox.setOrigin(hitbox.getSize().x / 2, hitbox.getSize().y / 2);
 
-		collisionBox.setRadius(SHIP_RADIUS);
+		collisionBox.setRadius(CONSTANTS.SHIP_RADIUS);
 		collisionBox.setOrigin(collisionBox.getRadius(), collisionBox.getRadius());
 
 		state = State::normal;
-
-		//the ship can only fire if it is not expanded
-		
-		//---firing a bullet---
-		if (sf::Joystick::isButtonPressed(shipNumber, 1))
-		{
-			if (!isFiringBullet)
-			{
-				isFiringBullet = true;
-				Bullet b(position, velocity, rotation); //bullet has the same starting position and velocity as the ship
-
-				float rot = rotation * M_PI / 180;
-
-				b.position.x += sin(rot) * collisionBox.getRadius();
-				b.position.y -= cos(rot) * collisionBox.getRadius();
-
-				b.velocity.x += sin(rot) * BULLET_SPEED;
-				b.velocity.y -= cos(rot) * BULLET_SPEED;
-
-				//ship gets knockback
-				velocity.x -= sin(rot) * BULLET_SPEED * SHIP_BULLET_FIRING_KNOCKBACK;
-				velocity.y += cos(rot) * BULLET_SPEED * SHIP_BULLET_FIRING_KNOCKBACK;
-
-				addBullet(b);
-			}
-		}
-		else
-		{
-			isFiringBullet = false;
-		}
-
-		//---firing a laser
-		if (sf::Joystick::isButtonPressed(shipNumber, 2))
-		{
-			isFiringLaser = true;
-			laserBuildup++;
-			laserBuildup = std::min(SHIP_LASER_MAX_BUILDUP, laserBuildup);
-
-			laserBar.setValue(laserBuildup);
-
-			//charging up the laser also adds heat
-			damage(SHIP_LASER_BUILDUP_MAX_HEAT * ((float)laserBuildup / SHIP_LASER_MAX_BUILDUP));
-		}
-		else
-		{
-			if (isFiringLaser)
-			{
-				isFiringLaser = false;
-				float rot = rotation * M_PI / 180;
-				float damage = (float)laserBuildup / SHIP_LASER_MAX_BUILDUP;
-
-				Laser laser(sf::Vector2f(position.x + sin(rot) * collisionBox.getRadius(),
-							position.y - cos(rot) * collisionBox.getRadius()),
-							rotation,
-							damage,
-							sf::Vector2f(0.f, 0.f));
-
-				addLaser(laser);
-
-				laserBuildup = 0;
-				laserBar.setValue(0);
-
-				//ship gets knockback
-				velocity.x -= sin(rot) * damage * SHIP_LASER_FIRING_KNOCKBACK;
-				velocity.y += cos(rot) * damage * SHIP_LASER_FIRING_KNOCKBACK;
-			}
-		}
-	}
-
-	//---draw / don't draw marker---
-	drawMarker = sf::Joystick::isButtonPressed(shipNumber, 7);
-
-	//---reset button---
-	if (sf::Joystick::isButtonPressed(shipNumber, 9))
-	{
-		position = sf::Vector2f(WIN_X_LEN / 2.0, WIN_Y_LEN / 2.0);
-		velocity.x = 0;
-		velocity.y = 0;
 	}
 }
+
+#if 0
+void Spaceship::handleFiring()
+{
+	//the ship can only fire if it is not expanded
+	if (state != State::normal)
+	{
+		laserBuildup = 0;
+		laserBar.setValue(0);
+		return;
+	}
+
+	//---firing a bullet---
+	if (sf::Joystick::isButtonPressed(shipNumber, 1))
+	{
+		if (!isFiringBullet)
+		{
+			isFiringBullet = true;
+			Bullet b(position, velocity, rotation); //bullet has the same starting position and velocity as the ship
+
+			float rot = rotation * M_PI / 180;
+
+			b.position.x += sin(rot) * collisionBox.getRadius();
+			b.position.y -= cos(rot) * collisionBox.getRadius();
+
+			b.velocity.x += sin(rot) * BULLET_SPEED;
+			b.velocity.y -= cos(rot) * BULLET_SPEED;
+
+			//ship gets knockback
+			velocity.x -= sin(rot) * BULLET_SPEED * CONSTANTS.SHIP_BULLET_FIRING_KNOCKBACK;
+			velocity.y += cos(rot) * BULLET_SPEED * CONSTANTS.SHIP_BULLET_FIRING_KNOCKBACK;
+
+			addBullet(b);
+		}
+	}
+	else
+	{
+		isFiringBullet = false;
+	}
+
+	//---firing a laser
+	if (sf::Joystick::isButtonPressed(shipNumber, 2))
+	{
+		isFiringLaser = true;
+		laserBuildup++;
+		laserBuildup = std::min(CONSTANTS.SHIP_LASER_MAX_BUILDUP, laserBuildup);
+
+		laserBar.setValue(laserBuildup);
+
+		//charging up the laser also adds heat
+		damage(CONSTANTS.SHIP_LASER_BUILDUP_MAX_HEAT * ((float)laserBuildup / CONSTANTS.SHIP_LASER_MAX_BUILDUP));
+	}
+	else
+	{
+		if (isFiringLaser)
+		{
+			isFiringLaser = false;
+			float rot = rotation * M_PI / 180;
+			float damage = (float)laserBuildup / CONSTANTS.SHIP_LASER_MAX_BUILDUP;
+
+			Laser laser(sf::Vector2f(position.x + sin(rot) * collisionBox.getRadius(),
+				position.y - cos(rot) * collisionBox.getRadius()),
+				rotation,
+				damage,
+				sf::Vector2f(0.f, 0.f));
+
+			addLaser(laser);
+
+			laserBuildup = 0;
+			laserBar.setValue(0);
+
+			//ship gets knockback
+			velocity.x -= sin(rot) * damage * CONSTANTS.SHIP_LASER_FIRING_KNOCKBACK;
+			velocity.y += cos(rot) * damage * CONSTANTS.SHIP_LASER_FIRING_KNOCKBACK;
+		}
+	}
+}
+#endif
 
 void Spaceship::update()
 {
@@ -363,10 +351,10 @@ void Spaceship::updateHeat()
 	switch (state)
 	{
 	case State::normal:
-		heat -= SHIP_HEAT_DISSIPATION;
+		heat -= CONSTANTS.SHIP_HEAT_DISSIPATION;
 		break;
 	case State::expanded:
-		heat -= SHIP_HEAT_DISSIPATION + SHIP_HEAT_EXPANDED_MAX_DISSIPATION * heatDissipationMultiplier;
+		heat -= CONSTANTS.SHIP_HEAT_DISSIPATION + CONSTANTS.SHIP_HEAT_EXPANDED_MAX_DISSIPATION * heatDissipationMultiplier;
 		break;
 	}
 	heat = std::max(heat, 0.0f);
@@ -411,7 +399,7 @@ bool Spaceship::handleCollision(Bullet b)
 	if (posX * posX + posY * posY < minDistance * minDistance)
 	{
 		damage(BULLET_DAMAGE);
-		addCameraShake(SHIP_BULLET_CAMERA_SHAKE);
+		addCameraShake(CONSTANTS.SHIP_BULLET_CAMERA_SHAKE);
 		return true;
 	}
 	return false;
@@ -445,7 +433,7 @@ bool Spaceship::handleCollision(Laser l)
 	if (dist < l.size.x / 2 + collisionBox.getRadius())
 	{
 		damage(l.damage);
-		addCameraShake(SHIP_LASER_CAMERA_SHAKE * l.damage);
+		addCameraShake(CONSTANTS.SHIP_LASER_CAMERA_SHAKE * l.damage);
 		return true;
 	}
 
@@ -505,14 +493,14 @@ void Spaceship::handleCollision(Asteroid &a)
 		}
 
 		//calculate the new "vertical" velocities using conservation of momentum and kinetic energy
-		float newVerticalV = (verticalV * (SHIP_MASS - a.mass) + 2 * a.mass * astVerticalV) / (SHIP_MASS + a.mass);
+		float newVerticalV = (verticalV * (CONSTANTS.SHIP_MASS - a.mass) + 2 * a.mass * astVerticalV) / (CONSTANTS.SHIP_MASS + a.mass);
 		float newAstVerticalV = verticalV - astVerticalV + newVerticalV;
 
 		//collisions aren't perfectly elastic, some energy becomes heat
-		damage(abs(verticalV - newVerticalV) * SHIP_COLLISION_HEAT_MULTIPLIER);
-		addCameraShake(abs(verticalV - newVerticalV) * SHIP_COLLISION_CAMERA_SHAKE);
-		newVerticalV *= SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
-		newAstVerticalV *= SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
+		damage(abs(verticalV - newVerticalV) * CONSTANTS.SHIP_COLLISION_HEAT_MULTIPLIER);
+		addCameraShake(abs(verticalV - newVerticalV) * CONSTANTS.SHIP_COLLISION_CAMERA_SHAKE);
+		newVerticalV *= CONSTANTS.SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
+		newAstVerticalV *= CONSTANTS.SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
 
 		//convert "horizontal" and "vertical" velocities back to x and y coordinates
 		velocity.x = horizontalV * sin(thetaT) - newVerticalV * cos(thetaT);
@@ -586,11 +574,11 @@ void Spaceship::handleCollision(Spaceship& s) //this is almost exactly the same 
 		float newAstVerticalV = verticalV;
 
 		//collisions aren't perfectly elastic, some energy becomes heat
-		damage(abs(verticalV - newVerticalV) * SHIP_COLLISION_HEAT_MULTIPLIER);
-		s.damage(abs(verticalV - newVerticalV) * SHIP_COLLISION_HEAT_MULTIPLIER);
-		addCameraShake(abs(verticalV - newVerticalV) * SHIP_COLLISION_CAMERA_SHAKE);
-		newVerticalV *= SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
-		newAstVerticalV *= SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
+		damage(abs(verticalV - newVerticalV) * CONSTANTS.SHIP_COLLISION_HEAT_MULTIPLIER);
+		s.damage(abs(verticalV - newVerticalV) * CONSTANTS.SHIP_COLLISION_HEAT_MULTIPLIER);
+		addCameraShake(abs(verticalV - newVerticalV) * CONSTANTS.SHIP_COLLISION_CAMERA_SHAKE);
+		newVerticalV *= CONSTANTS.SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
+		newAstVerticalV *= CONSTANTS.SHIP_COLLISION_SLOWDOWN_MULTIPLIER;
 
 		//convert "horizontal" and "vertical" velocities back to x and y coordinates
 		velocity.x = horizontalV * sin(thetaT) - newVerticalV * cos(thetaT);
@@ -613,6 +601,11 @@ void Spaceship::damage(float amount)
 	heatBar.setValue(heat);
 }
 
+bool Spaceship::isOverheat()
+{
+	return heat > CONSTANTS.SHIP_MAX_HEAT;
+}
+
 void Spaceship::setMarkerPosition(sf::Vector2f pos)
 {
 	//marker.setPosition(pos.x, pos.y + SHIP_MARKER_OFFSET);
@@ -626,28 +619,6 @@ void Spaceship::resetUIPositions()
 {
 	heatBar.resetPosition();
 	laserBar.resetPosition();
-}
-
-void Spaceship::changeState(State newState)
-{
-	state = newState;
-	switch (state)
-	{
-	case State::normal:
-		hitbox.setSize(SHIP_SIZE);
-		hitbox.setOrigin(SHIP_SIZE.x / 2, SHIP_SIZE.y / 2);
-
-		collisionBox.setRadius(SHIP_RADIUS);
-		collisionBox.setOrigin(collisionBox.getRadius(), collisionBox.getRadius());
-		break;
-	case State::expanded:
-		hitbox.setSize(SHIP_EXPANDED_MAX_SIZE);
-		hitbox.setOrigin(SHIP_EXPANDED_MAX_SIZE.x / 2, SHIP_EXPANDED_MAX_SIZE.y / 2);
-
-		collisionBox.setRadius(SHIP_EXPANDED_MAX_RADIUS);
-		collisionBox.setOrigin(collisionBox.getRadius(), collisionBox.getRadius());
-		break;
-	}
 }
 
 /*

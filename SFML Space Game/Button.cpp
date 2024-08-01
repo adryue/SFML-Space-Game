@@ -28,11 +28,13 @@ void Button::setSelected(bool selected)
 {
 	if (selected)
 	{
+		//text.setStyle(sf::Text::Underlined);
 		hitbox.setOutlineThickness(2.0);
 		hitbox.setFillColor(BUTTON_SELECTED_COLOR);
 	}
 	else
 	{
+		//text.setStyle(sf::Text::Regular);
 		hitbox.setOutlineThickness(0);
 		hitbox.setFillColor(BUTTON_DEFAULT_COLOR);
 	}

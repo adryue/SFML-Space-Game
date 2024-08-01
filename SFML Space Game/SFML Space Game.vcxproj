@@ -145,6 +145,8 @@
     <ClCompile Include="Laser.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="play.cpp" />
+    <ClCompile Include="Ship0.cpp" />
+    <ClCompile Include="Ship1.cpp" />
     <ClCompile Include="spaceship.cpp" />
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="Utilities.cpp" />
@@ -162,6 +164,8 @@
     <ClInclude Include="home.h" />
     <ClInclude Include="Laser.h" />
     <ClInclude Include="play.h" />
+    <ClInclude Include="Ship0.h" />
+    <ClInclude Include="Ship1.h" />
     <ClInclude Include="spaceship.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="Utilities.h" />
